@@ -5,7 +5,8 @@
 - This is a 3.3 V W65C816 computer.
 - Application code runs on a physical W65C816S CPU.
 - The RP2350B is a video, audio and I/O coprocessor.
-- Prefer through-hole and socketable components wherever practical.
+- Prefer through-hole and socketable components wherever practical on the mainboard.
+- The RP2350 daughterboard may use SMD components as required for the RP2350B, HDMI/DVI, USB, high-speed memory and other dense or high-speed circuitry.
 - Do not replace selected parts without explaining why.
 - Do not make large changes in a single operation.
 
@@ -13,11 +14,11 @@
 
 - W65C816S6PG-14 in DIP-40.
 - AS6C4008 SRAM in DIP-32.
-- Glue logic in DIP packages.
+- Mainboard glue logic in DIP packages.
 - Use turned-pin sockets for CPU, memory and important logic.
 - Use a socketed RP2350B daughterboard.
 - Use two 2x20, 2.54 mm board-to-board connectors.
-- HDMI and high-speed video circuitry remain on the RP2350 daughterboard.
+- HDMI and high-speed video circuitry remain on the RP2350 daughterboard and are not expected to be through-hole.
 
 ## Electrical rules
 
