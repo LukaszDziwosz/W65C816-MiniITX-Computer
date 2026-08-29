@@ -1,370 +1,558 @@
-W65C816 + RP2350 Computer — Design Overview
+W65C816 + RP2350 Computer Design Overview
+==========================================
 
-Project structure
+This repository contains a two-board 3.3 V W65C816 computer.
 
-The computer is split into two separate KiCad projects inside one Git repository:
+- The mainboard is the real 65C816 computer: CPU, RAM, ROM, address decode,
+  expansion bus, power entry, and socketable glue logic.
+- The RP2350 daughterboard is the modern I/O and media board: video, audio,
+  USB, storage, networking, and dense/high-speed circuitry.
+
+The design goal is to keep user applications and game logic running as real
+65C816 machine code, while the RP2350 behaves like a hardware chipset.
+
+
+Project Structure
+-----------------
+
 W65C816-Computer/
-├── Mainboard/
-│   ├── W65C816-Computer.kicad_pro
-│   ├── W65C816-Computer.kicad_sch
-│   └── W65C816-Computer.kicad_pcb
-│
-├── RP2350-Daughterboard/
-│   ├── RP2350-Daughterboard.kicad_pro
-│   ├── RP2350-Daughterboard.kicad_sch
-│   └── RP2350-Daughterboard.kicad_pcb
-│
-├── Shared-Libraries/
-├── Documentation/
-├── Firmware/
-└── AGENTS.md
 
-The mainboard contains the real W65C816 CPU, RAM, ROM, address decoding, expansion bus and socketable glue logic.
-The daughterboard contains the RP2350B, HDMI/DVI output, USB, graphics memory and modern high-speed components.
-1. System concept
-                         ┌──────────────────────────┐
-                         │      W65C816 CPU         │
-                         │        8–14 MHz          │
-                         └────────────┬─────────────┘
-                                      │
-                          24-bit address / 8-bit data
-                                      │
-               ┌──────────────────────┴──────────────────────┐
-               │                                             │
-        ┌──────▼──────┐                              ┌───────▼───────┐
-        │ Main SRAM   │                              │ Boot Flash    │
-        │ 512 KB–4 MB │                              │ 512 KB        │
-        └─────────────┘                              └───────────────┘
-               │                                             │
-               └──────────────────────┬──────────────────────┘
-                                      │
-                            Address decoding/glue
-                                      │
-                         ┌────────────▼─────────────┐
-                         │ RP2350 daughterboard     │
-                         │ memory-mapped interface  │
-                         └────────────┬─────────────┘
-                                      │
-                 ┌──────────┬─────────┼──────────┬──────────┐
-                 │          │         │          │          │
-               Video      Audio      USB       Storage    Network
+- Mainboard/
+  - W65C816-Computer.kicad_pro
+  - W65C816-Computer.kicad_sch
+  - W65C816-Computer.kicad_pcb
+- RP2350-Daughterboard/
+  - RP2350-Daughterboard.kicad_pro
+  - RP2350-Daughterboard.kicad_sch
+  - RP2350-Daughterboard.kicad_pcb
+- Shared-Libraries/
+- Documentation/
+- Firmware/
+- AGENTS.md
+- board_design.txt
 
-All user applications and game logic run as real 65C816 machine code on the physical W65C816.
-The RP2350 acts as:
-- graphics processor
-- audio processor
-- USB controller
-- storage controller
-- networking controller
+
+System Concept
+--------------
+
+The mainboard exposes a 24-bit address bus and 8-bit data bus from the
+W65C816. Main SRAM and boot Flash sit directly on that bus behind address
+decoding and glue logic. The RP2350 daughterboard appears to the W65C816 as a
+memory-mapped I/O device.
+
+High-level block diagram:
+
+W65C816 CPU
+  -> 24-bit address bus / 8-bit data bus
+  -> SRAM and boot Flash
+  -> address decoding / glue logic
+  -> RP2350 daughterboard memory-mapped interface
+  -> video, audio, USB, storage, networking, debug, GPIO
+
+The RP2350 is responsible for:
+
+- graphics processing
+- audio processing
+- USB host support
+- SD-card storage
+- Ethernet and WiFi offload interfaces
 - debugging interface
-- general-purpose I/O controller
-
-2. Mainboard
-2.1 CPU subsystem
-Components
-Reference	Component	Suggested part	Package
-U1	Main CPU	W65C816S6PG-14	DIP-40
-X1	CPU clock oscillator	8 MHz CMOS oscillator	DIP-4
-U2	Bank-address latch	74HC573N	DIP-20
-U3	CPU data transceiver	74HC245N	DIP-20
-U4	Reset supervisor	MCP100 or MCP130	TO-92
-U5	Reset signal conditioning	74HC14N	DIP-14
-SW1	Reset button	Momentary push button	THT
-SW2	NMI button	Momentary push button	THT
+- general-purpose I/O
 
 
-Purpose
-The W65C816 multiplexes address bits A16–A23 onto D0–D7 during part of the bus cycle. U2 latches those upper address bits so the system has a stable 24-bit address bus.
-The first board should run at 8 MHz. The oscillator is socketed so faster clock modules can later be tested.
-Main CPU signals
-A0–A15
-A16–A23 latched
-D0–D7
-PHI2
-R/W
-RESET
-IRQ
-NMI
-RDY
-BE
-VDA
-VPA
-E
-MX
+Mainboard
+=========
 
-2.2 Main memory
-Components
-Reference	Component	Suggested part	Package
-U20–U27	512 KB SRAM	AS6C4008-55PCN	DIP-32
-C20–C27	Decoupling	100 nF ceramic	THT radial
+Mainboard Design Rules
+----------------------
+
+- Main logic voltage: 3.3 V.
+- Prefer through-hole and socketable components wherever practical.
+- CPU, memory, oscillator, and important glue logic should be socketed.
+- Mainboard glue logic should use 74HC-family DIP parts.
+- Do not use 5 V-only logic parts without explicit review.
+- Every IC needs local 100 nF decoupling.
+- Flash write-enable must default to disabled.
+- HDMI, USB high-speed routing, RP2350, and dense modern circuitry belong on
+  the daughterboard.
 
 
-Capacity options
-1 chip  = 512 KB
-2 chips = 1 MB
-4 chips = 2 MB
-8 chips = 4 MB
-The board should boot with only one SRAM populated.
+1. CPU Subsystem
+----------------
+
+Purpose:
+
+The W65C816 multiplexes bank address bits A16-A23 onto D0-D7 during part of
+the bus cycle. The bank-address latch captures these bits so the rest of the
+system sees a stable 24-bit address bus.
+
+The first board should run at 8 MHz. The oscillator is socketed so faster
+clock modules can be tested later.
+
+Components:
+
+| Reference | Function                 | Suggested Part        | Package |
+|-----------|--------------------------|-----------------------|---------|
+| U1        | Main CPU                 | W65C816S6PG-14        | DIP-40  |
+| X1        | CPU clock oscillator     | 8 MHz CMOS oscillator | DIP-14  |
+| U2        | Bank-address latch       | 74HC573N              | DIP-20  |
+| U3        | CPU data transceiver     | 74HC245N              | DIP-20  |
+| U4        | Reset supervisor         | MCP100 or MCP130      | TO-92   |
+| U5        | Reset conditioning       | 74HC14N               | DIP-14  |
+| SW1       | Reset button             | Momentary switch      | THT     |
+| SW2       | NMI button               | Momentary switch      | THT     |
+
+Main CPU signals:
+
+- A0-A15
+- A16-A23 latched
+- D0-D7
+- PHI2
+- R/W
+- RESET
+- IRQ
+- NMI
+- RDY
+- BE
+- VDA
+- VPA
+- E
+- MX
+
+
+2. Main Memory
+--------------
+
+The mainboard should include eight SRAM sockets from revision A so the board is
+mechanically close to final from the start. It must still boot and pass basic
+memory tests with only U20 populated.
+
+Components:
+
+| Reference | Function     | Suggested Part | Package |
+|-----------|--------------|----------------|---------|
+| U20-U27   | 512 KB SRAM  | AS6C4008-55PCN | DIP-32  |
+| C20-C27   | Decoupling   | 100 nF ceramic | THT     |
+
+Capacity options:
+
+| Populated SRAMs | Capacity |
+|-----------------|----------|
+| 1               | 512 KB   |
+| 2               | 1 MB     |
+| 4               | 2 MB     |
+| 8               | 4 MB     |
+
 All SRAM chips share:
-A0–A18
-D0–D7
-/OE
-/WE
-Each SRAM receives an independent chip-select signal.
-2.3 Boot flash
-Components
-Reference	Component	Suggested part	Package
-U30	512 KB Flash	SST39VF040	PLCC-32
-SK30	Flash socket	PLCC-32 THT socket	Through-hole
-JP1	Write-enable jumper	2-pin header	2.54 mm
-R30	/WE pull-up	10 kΩ	Axial
-C30	Decoupling	100 nF	THT
+
+- A0-A18
+- D0-D7
+- /OE
+- /WE
+
+Each SRAM receives an independent active-low chip select:
+
+- /RAM_CS0
+- /RAM_CS1
+- /RAM_CS2
+- /RAM_CS3
+- /RAM_CS4
+- /RAM_CS5
+- /RAM_CS6
+- /RAM_CS7
 
 
-The flash stores:
+3. Boot Flash / ROM
+-------------------
+
+The boot Flash stores the reset vectors and firmware needed to start the
+system.
+
+Components:
+
+| Reference | Function            | Suggested Part        | Package |
+|-----------|---------------------|-----------------------|---------|
+| U30       | 512 KB Flash        | SST39VF040            | PLCC-32 |
+| SK30      | Flash socket        | PLCC-32 THT socket    | THT     |
+| JP1       | Write-enable jumper | 2-pin header, 2.54 mm | THT     |
+| R30       | /WE pull-up         | 10 kΩ                 | Axial   |
+| C30       | Decoupling          | 100 nF                | THT     |
+
+Flash contents may include:
+
 - reset vectors
 - boot monitor
 - firmware loader
 - BASIC or operating system
 - hardware diagnostics
-- ROM filesystem if desired
-Flash writing must be disabled by default.
-2.4 Address decoding and glue logic
-Components
-Reference	Component	Suggested part	Package
-U6	Main address decoder	74HC138N	DIP-16
-U7	SRAM-bank decoder	74HC138N	DIP-16
-U8	I/O decoder	74HC139N	DIP-16
-U9	NAND gates	74HC00N	DIP-14
-U10	Inverters	74HC04N	DIP-14
-U11	AND gates	74HC08N	DIP-14
-U12	OR gates	74HC32N	DIP-14
-U13	Flip-flops	74HC74N	DIP-14
-U14	Tri-state buffers	74HC125N	DIP-14
-U15	Address buffer	74HC541N	DIP-20
-U16	RP2350 data transceiver	74HC245N	DIP-20
+- optional ROM filesystem
+
+Flash write-enable must default to disabled. JP1 may be used to deliberately
+enable in-system Flash programming.
 
 
-Not all gates may be needed in the final schematic. Keeping spare gate sections available is useful during revision A.
-Generated chip-select signals
-/RAM_CS0
-/RAM_CS1
-/RAM_CS2
-/RAM_CS3
-/RAM_CS4
-/RAM_CS5
-/RAM_CS6
-/RAM_CS7
+4. Address Decode and Glue Logic
+--------------------------------
 
-/ROM_CS
-/RP_CS
-/EXP_CS
-/IO_CS
-/IO_RD
-/IO_WR
+Address decoding generates SRAM, ROM, RP2350, expansion, and I/O chip-select
+signals. Not every spare gate must be used in revision A, but the schematic can
+include common glue packages so spare gates are available.
 
-2.5 RP2350 interface
-The mainboard communicates with the daughterboard through memory-mapped registers.
-Interface signals
-D0–D7
-A0–A7
-PHI2
-R/W
-/RP_CS
-RESET
-IRQ
-NMI
-RDY
-BE
-DMA_REQ
-DMA_ACK
-ROM_OVERLAY
-FRAME_IRQ
+Components:
 
-The RP2350 does not need the complete 24-bit address bus. The mainboard decoder generates /RP_CS for the assigned register range.
-Proposed memory map
-$F00000–$F000FF   RP2350 registers
-$F00100–$F001FF   Command FIFO
-$F00200–$F002FF   Response FIFO
-$F00300–$F003FF   Input-event FIFO
-$F10000–$F1FFFF   Optional shared-memory window
-Suggested register groups
-$F00000–$F0001F   System control
-$F00020–$F0003F   Video control
-$F00040–$F0005F   Audio control
-$F00060–$F0007F   Storage
-$F00080–$F0009F   USB/input
-$F000A0–$F000BF   Networking
-$F000C0–$F000DF   Debugging
-$F000E0–$F000FF   Reserved
+| Reference | Function                | Suggested Part | Package |
+|-----------|-------------------------|----------------|---------|
+| U6        | Main address decoder    | 74HC138N       | DIP-16  |
+| U7        | SRAM-bank decoder       | 74HC138N       | DIP-16  |
+| U8        | I/O decoder             | 74HC139N       | DIP-16  |
+| U9        | NAND gates              | 74HC00N        | DIP-14  |
+| U10       | Inverters               | 74HC04N        | DIP-14  |
+| U11       | AND gates               | 74HC08N        | DIP-14  |
+| U12       | OR gates                | 74HC32N        | DIP-14  |
+| U13       | Flip-flops              | 74HC74N        | DIP-14  |
+| U14       | Tri-state buffers       | 74HC125N       | DIP-14  |
+| U15       | Address/control buffer  | 74HC541N       | DIP-20  |
+| U16       | RP2350 data transceiver | 74HC245N       | DIP-20  |
 
-2.6 Daughterboard connectors
-Use two parallel 2×20, 2.54 mm connectors.
-Components
-Reference	Component	Suggested part
-J1	CPU and control connector	Samtec SSW-120-02-G-D
-J2	Peripheral and power connector	Samtec SSW-120-02-G-D
-MH1–MH2	Daughterboard supports	M3 mounting holes
+Generated chip-select and control signals:
+
+- /RAM_CS0 through /RAM_CS7
+- /ROM_CS
+- /RP_CS
+- /EXP_CS
+- /IO_CS
+- /IO_RD
+- /IO_WR
+
+Revision A boot decode:
+
+- U7 divides the low 4 MB memory space into eight 512 KB SRAM windows.
+- U20-U27 use /RAM_CS0 through /RAM_CS7 for up to 4 MB fitted SRAM.
+- U6 detects bank $00 within the low SRAM window.
+- Boot Flash overlays $00:8000-$FFFF so reset vectors are reachable.
+- RAM0 is disabled while the boot Flash window is active.
+- /OE and /WE are derived from R/W.
 
 
-The motherboard uses female sockets. The daughterboard uses matching male headers.
-J1: CPU interface
- 1  GND              2  GND
- 3  D0               4  D1
- 5  D2               6  D3
- 7  D4               8  D5
- 9  D6              10  D7
+5. RP2350 Mainboard Interface
+-----------------------------
 
-11  A0              12  A1
-13  A2              14  A3
-15  A4              16  A5
-17  A6              18  A7
+The RP2350 daughterboard is memory-mapped. The mainboard address decoder
+generates /RP_CS for the selected register range. The RP2350 does not need the
+complete 24-bit address bus.
 
-19  PHI2            20  R/W
-21  /RP_CS          22  /RESET
-23  /IRQ            24  /NMI
-25  RDY             26  BE
-27  VDA             28  VPA
-29  DMA_REQ         30  DMA_ACK
+Signals to the daughterboard:
 
-31  ROM_OVERLAY     32  FRAME_IRQ
-33  AUDIO_IRQ       34  IO_IRQ
-35  GPIO_SPARE0     36  GPIO_SPARE1
-37  3V3             38  3V3
-39  GND             40  GND
-J2: peripheral interface
- 1  GND              2  GND
- 3  SD_CLK           4  SD_CMD
- 5  SD_D0            6  SD_D1
- 7  SD_D2            8  SD_D3
+- D0-D7
+- A0-A7
+- PHI2
+- R/W
+- /RP_CS
+- /RESET
+- /IRQ
+- /NMI
+- RDY
+- BE
+- DMA_REQ
+- DMA_ACK
+- ROM_OVERLAY
+- FRAME_IRQ
+- AUDIO_IRQ
+- IO_IRQ
+- GPIO_SPARE0
+- GPIO_SPARE1
+- 3.3 V
+- 5 V
+- GND
 
- 9  I2S_BCLK        10  I2S_LRCLK
-11  I2S_DATA        12  I2S_MCLK
+Proposed memory map:
 
-13  SPI_CLK         14  SPI_MOSI
-15  SPI_MISO        16  SPI_CS
+| Address Range   | Function                      |
+|-----------------|-------------------------------|
+| $F00000-$F000FF | RP2350 registers              |
+| $F00100-$F001FF | Command FIFO                  |
+| $F00200-$F002FF | Response FIFO                 |
+| $F00300-$F003FF | Input-event FIFO              |
+| $F10000-$F1FFFF | Optional shared-memory window |
 
-17  USB_D+          18  USB_D-
-19  UART_TX         20  UART_RX
-21  I2C_SDA         22  I2C_SCL
+Suggested RP2350 register groups:
 
-23  JOY1_IRQ        24  JOY2_IRQ
-25  GPIO0           26  GPIO1
-27  GPIO2           28  GPIO3
-29  GPIO4           30  GPIO5
-31  GPIO6           32  GPIO7
-
-33  5V              34  5V
-35  3V3             36  3V3
-37  GND             38  GND
-39  GND             40  GND
-USB may later be removed from this connector and placed entirely on the daughterboard.
-
-2.7 Expansion bus
-Connector signals
-A0–A23
-D0–D7
-PHI2
-R/W
-RESET
-IRQ
-NMI
-RDY
-BE
-/EXP_CS
-3.3 V
-5 V
-GND
-Suggested connector
-2×25 or 2×30
-2.54 mm
-through-hole
-keyed if possible
-The expansion connector should contain multiple ground pins placed beside clock and control signals.
-2.8 Debug connectors and test points
-Required test points
-PHI2
-RESET
-IRQ
-NMI
-RDY
-BE
-R/W
-VDA
-VPA
-E
-MX
-A16–A23
-D0–D7
-/RAM_CS0–7
-/ROM_CS
-/RP_CS
-3.3 V
-5 V
-GND
-Logic analyser header
-Suggested 2×20 or 2×25 header:
-A0–A15
-A16–A23
-D0–D7
-PHI2
-R/W
-RESET
-IRQ
-VDA
-VPA
-GND
-2.9 Mainboard power
-Components
-Reference	Component	Suggested implementation
-J3	5 V input	Barrel connector or USB-C power-only
-SW3	Main power switch	THT toggle or slide switch
-F1	Input fuse	1.5–2 A polyfuse
-MOD1	3.3 V regulator	Socketed buck module
-D1	Reverse-voltage protection	P-channel MOSFET or Schottky
-C1–C4	Bulk capacitors	22–100 µF
-Cx	Per-IC decoupling	100 nF
-LED1	Power LED	THT
-R1	LED resistor	1–2.2 kΩ
+| Address Range   | Register Group |
+|-----------------|----------------|
+| $F00000-$F0001F | System control |
+| $F00020-$F0003F | Video control  |
+| $F00040-$F0005F | Audio control  |
+| $F00060-$F0007F | Storage        |
+| $F00080-$F0009F | USB/input      |
+| $F000A0-$F000BF | Networking     |
+| $F000C0-$F000DF | Debugging      |
+| $F000E0-$F000FF | Reserved       |
 
 
-Power rails
-5 V input
-3.3 V main logic rail
-1.1 V generated locally on RP2350 daughterboard
-The mainboard should supply at least:
-3.3 V at 1.5–2 A
-5 V at 1 A for USB/peripherals
-3. RP2350 daughterboard
-3.1 RP2350 core
-Components
-Reference	Component	Suggested part	Package
-U1	Coprocessor	RP2350B	QFN-80
-U2	QSPI Flash	W25Q128JV or similar	SOIC-8/WSON
-Y1	Crystal	12 MHz	SMD
-U3	Core regulator	RP2350 reference design part	SMD
-SW1	BOOTSEL	Tactile button	THT or SMD
-SW2	RUN/reset	Tactile button	THT or SMD
-J3	SWD connector	2×5 or 3-pin	THT
-J4	Debug UART	1×4 header	THT
+6. Daughterboard Connectors
+---------------------------
+
+Use two parallel 2x20, 2.54 mm board-to-board connectors.
+
+Components:
+
+| Reference | Function                   | Suggested Part        |
+|-----------|----------------------------|-----------------------|
+| J1        | CPU/control connector      | Samtec SSW-120-02-G-D |
+| J2        | Peripheral/power connector | Samtec SSW-120-02-G-D |
+| MH1-MH2   | Daughterboard supports     | M3 mounting holes     |
+
+The mainboard uses female sockets. The daughterboard uses matching male
+headers.
+
+J1: CPU interface:
+
+| Pin | Signal      | Pin | Signal      |
+|-----|-------------|-----|-------------|
+| 1   | GND         | 2   | GND         |
+| 3   | D0          | 4   | D1          |
+| 5   | D2          | 6   | D3          |
+| 7   | D4          | 8   | D5          |
+| 9   | D6          | 10  | D7          |
+| 11  | A0          | 12  | A1          |
+| 13  | A2          | 14  | A3          |
+| 15  | A4          | 16  | A5          |
+| 17  | A6          | 18  | A7          |
+| 19  | PHI2        | 20  | R/W         |
+| 21  | /RP_CS      | 22  | /RESET      |
+| 23  | /IRQ        | 24  | /NMI        |
+| 25  | RDY         | 26  | BE          |
+| 27  | VDA         | 28  | VPA         |
+| 29  | DMA_REQ     | 30  | DMA_ACK     |
+| 31  | ROM_OVERLAY | 32  | FRAME_IRQ   |
+| 33  | AUDIO_IRQ   | 34  | IO_IRQ      |
+| 35  | GPIO_SPARE0 | 36  | GPIO_SPARE1 |
+| 37  | 3V3         | 38  | 3V3         |
+| 39  | GND         | 40  | GND         |
+
+J2: peripheral and power interface:
+
+| Pin | Signal   | Pin | Signal    |
+|-----|----------|-----|-----------|
+| 1   | GND      | 2   | GND       |
+| 3   | SD_CLK   | 4   | SD_CMD    |
+| 5   | SD_D0    | 6   | SD_D1     |
+| 7   | SD_D2    | 8   | SD_D3     |
+| 9   | I2S_BCLK | 10  | I2S_LRCLK |
+| 11  | I2S_DATA | 12  | I2S_MCLK  |
+| 13  | SPI_CLK  | 14  | SPI_MOSI  |
+| 15  | SPI_MISO | 16  | SPI_CS    |
+| 17  | USB_D+   | 18  | USB_D-    |
+| 19  | UART_TX  | 20  | UART_RX   |
+| 21  | I2C_SDA  | 22  | I2C_SCL   |
+| 23  | JOY1_IRQ | 24  | JOY2_IRQ  |
+| 25  | GPIO0    | 26  | GPIO1     |
+| 27  | GPIO2    | 28  | GPIO3     |
+| 29  | GPIO4    | 30  | GPIO5     |
+| 31  | GPIO6    | 32  | GPIO7     |
+| 33  | 5V       | 34  | 5V        |
+| 35  | 3V3      | 36  | 3V3       |
+| 37  | GND      | 38  | GND       |
+| 39  | GND      | 40  | GND       |
+
+Power note:
+
+The daughterboard will host USB-A ports and should receive several 5 V and GND
+connections through the board-to-board connector. USB port current limiting
+belongs on the daughterboard, close to the USB connectors.
 
 
-The RP2350 daughterboard should follow Raspberry Pi’s reference design for:
-- power rails
-- core regulator
-- flash connections
-- crystal circuit
-- decoupling
-- RUN
-- BOOTSEL
-- SWD
-3.2 Video subsystem
-Initial target
-Logical resolution: 320 × 240
-Output resolution: 640 × 480
-Pixel format: 8-bit indexed colour
-Refresh rate: 60 Hz
-RP2350 responsibilities
+7. Expansion Bus
+----------------
+
+Suggested connector:
+
+- 2x25 or 2x30
+- 2.54 mm
+- through-hole
+- keyed if practical
+
+Signals:
+
+- A0-A23
+- D0-D7
+- PHI2
+- R/W
+- RESET
+- IRQ
+- NMI
+- RDY
+- BE
+- /EXP_CS
+- 3.3 V
+- 5 V
+- GND
+
+Place multiple ground pins beside clock and control signals.
+
+
+8. Debug Connectors and Test Points
+-----------------------------------
+
+Required test points:
+
+- PHI2
+- RESET
+- IRQ
+- NMI
+- RDY
+- BE
+- R/W
+- VDA
+- VPA
+- E
+- MX
+- A16-A23
+- D0-D7
+- /RAM_CS0 through /RAM_CS7
+- /ROM_CS
+- /RP_CS
+- 3.3 V
+- 5 V
+- GND
+
+Suggested logic-analyser header:
+
+- 2x20 or 2x25
+- A0-A15
+- A16-A23
+- D0-D7
+- PHI2
+- R/W
+- RESET
+- IRQ
+- VDA
+- VPA
+- GND
+
+
+9. Mainboard Power
+------------------
+
+The final mainboard should accept 5 V through a through-hole DC input connector
+rated for at least 5 A. PJ-102AH is the selected 5 A barrel jack for the
+mainboard input.
+
+The mainboard protects and distributes the 5 V rail, then generates the main
+3.3 V logic rail with a socketed buck module.
+
+Recommended power path:
+
+5 V DC input -> fuse -> power switch -> reverse-polarity protection ->
+protected +5V rail -> 3.3 V buck module and daughterboard power feed
+
+Components:
+
+| Reference | Function                    | Suggested Implementation |
+|-----------|-----------------------------|--------------------------|
+| J4        | 5 V input                   | CUI PJ-102AH, 5 A-rated THT barrel jack |
+| F1        | Input fuse                  | 5 A replaceable fuse or appropriately derated polyfuse |
+| SW3       | Main power switch           | High-current external or THT switch |
+| Q1        | Reverse-polarity protection | P-channel MOSFET, TO-220 |
+| D1        | Input transient protection  | 5 V TVS diode            |
+| MOD1      | 3.3 V regulator             | Socketed buck module, 3 A minimum |
+| C40       | 5 V bulk capacitance        | 470 uF electrolytic      |
+| C41       | 5 V local bypass            | 100 nF ceramic           |
+| C42       | 3.3 V bulk capacitance      | 470 uF electrolytic      |
+| C43       | 3.3 V local bypass          | 100 nF ceramic           |
+| LED1      | Power LED                   | THT LED                  |
+| R41       | LED resistor                | 1 kΩ to 2.2 kΩ           |
+| TP23      | 5 V test point              | THT test point           |
+| TP24      | 3.3 V test point            | THT test point           |
+| TP25      | Ground test point           | THT test point           |
+
+Power rails:
+
+- +5V_IN: raw DC input.
+- +5V_FUSED: after the input fuse.
+- +5V_SW: after the main switch.
+- +5V: protected 5 V rail.
+- +3V3: regulated main logic rail.
+- GND: common system ground.
+
+Current planning:
+
+- Use PJ-102AH as the 5 A-rated input connector for the final board.
+- The RP2350 daughterboard can contain several USB-A ports. Three to four USB
+  ports can draw 1.5-2.0 A before the daughterboard electronics are counted.
+- The daughterboard must not connect USB-A VBUS directly to +5V. Use one
+  current-limited load switch per USB-A port, with local ESD protection.
+- The 5 V and GND pins between the mainboard and daughterboard should use
+  multiple parallel contacts to reduce voltage drop.
+- If the final system must support several high-current USB devices at once,
+  consider a higher-current power connector or a separate daughterboard power
+  input.
+
+
+RP2350 Daughterboard
+====================
+
+Daughterboard Design Rules
+--------------------------
+
+- The daughterboard may use SMD components where required.
+- HDMI/DVI, USB, RP2350, high-speed memory, and dense circuitry live here.
+- Follow Raspberry Pi RP2350 reference design guidance for the RP2350 core,
+  crystal, flash, power rails, RUN, BOOTSEL, and SWD.
+- Route USB as 90 Ω differential pairs.
+- Keep HDMI/DVI high-speed routing entirely on the daughterboard.
+
+
+1. Physical I/O Placement
+-------------------------
+
+Rear panel:
+
+- DVI/HDMI connector
+- RJ45 Ethernet
+- power jack, if mechanically placed on rear panel
+- two USB-A ports
+
+Front panel:
+
+- USB-A port 1
+- USB-A port 2
+- full-size SD card
+- power/reset controls
+
+The exact board-edge assignment may change during mechanical layout, but this
+front/rear split is the current target.
+
+
+2. RP2350 Core
+--------------
+
+Components:
+
+| Reference | Function       | Suggested Part       | Package   |
+|-----------|----------------|----------------------|-----------|
+| U1        | Coprocessor    | RP2350B              | QFN-80    |
+| U2        | QSPI Flash     | W25Q128JV or similar | SOIC-8/WSON |
+| Y1        | Crystal        | 12 MHz               | SMD       |
+| U3        | Core regulator | RP2350 reference design | SMD    |
+| SW1       | BOOTSEL        | Tactile button       | THT/SMD   |
+| SW2       | RUN/reset      | Tactile button       | THT/SMD   |
+| J3        | SWD connector  | 2x5 or 3-pin         | THT       |
+| J4        | Debug UART     | 1x4 header           | THT       |
+
+
+3. Video Subsystem
+------------------
+
+Initial target:
+
+- Logical resolution: 320 x 240
+- Output resolution: 640 x 480
+- Pixel format: 8-bit indexed colour
+- Refresh rate: 60 Hz
+
+RP2350 responsibilities:
+
 - framebuffer generation
 - palette conversion
 - tile rendering
@@ -374,59 +562,186 @@ RP2350 responsibilities
 - frame synchronization
 - raster interrupts
 - DVI/HDMI-compatible output
-Components
-Reference	Component	Purpose
-J5	HDMI Type-A connector	Video output
-RN1–RN4	HSTX resistor network	TMDS output
-U4	HDMI ESD protection	Connector protection
-R/C network	Hot-plug detection	HDMI detection
-Cx	Local decoupling	High-speed supply bypass
 
+Components:
+
+| Reference | Function              | Purpose |
+|-----------|-----------------------|---------|
+| J5        | HDMI Type-A connector | Video output |
+| RN1-RN4   | HSTX resistor network | TMDS output |
+| U4        | HDMI ESD protection   | Connector protection |
+| R/C net   | Hot-plug detect       | HDMI detection |
+| Cx        | Local decoupling      | High-speed supply bypass |
 
 HDMI high-speed signals remain entirely on the daughterboard.
-3.3 Graphics memory
-Revision A may use only RP2350 internal SRAM.
-Optional external memory footprint:
-Reference	Component	Suggested part
-U5	PSRAM	APS6404L or equivalent
-Cx	Decoupling	100 nF
-R-series	Signal damping	22–33 Ω
 
+
+4. Video Modes
+--------------
+
+Suggested standard mode table:
+
+| Mode | Description |
+|------|-------------|
+| 00   | 40 x 30 text, 8 x 8 font |
+| 01   | 40 x 25 text, 8 x 8 font with border |
+| 02   | 80 x 30 text, 8 x 16 font |
+| 03   | 80 x 60 text, 8 x 8 font |
+| 04   | 64 x 30 text, 8 x 8 font |
+| 10   | 320 x 240, 4-bit bitmap |
+| 11   | 320 x 240, 8-bit indexed bitmap |
+| 12   | 160 x 120, 8-bit indexed bitmap |
+| 13   | 640 x 480, 1-bit bitmap |
+| 14   | 640 x 480, 4-bit bitmap |
+| 20   | 40 x 30 tiles, 8 x 8 |
+| 21   | 20 x 15 tiles, 16 x 16 |
+| 22   | Scrolling tile map, two layers |
+| 23   | Tile map plus sprites |
+| 24   | Bitmap plus sprites |
+| 30   | Graphics plus 40-column text overlay |
+| 31   | Graphics plus 80-column text overlay |
+
+Recommended revision A minimum:
+
+- Mode 00: 40 x 30 text
+- Mode 02: 80 x 30 text
+- Mode 11: 320 x 240, 8-bit indexed bitmap
+- Mode 20: 40 x 30 tile mode
+- Mode 23: two tile layers plus sprites
+
+All modes should share a programmable 256-entry RGB palette. Physical output
+remains fixed at 640 x 480 at 60 Hz.
+
+
+5. Graphics Memory
+------------------
+
+Revision A may use only RP2350 internal SRAM.
+
+Optional external memory:
+
+| Reference | Function       | Suggested Part |
+|-----------|----------------|----------------|
+| U5        | PSRAM          | APS6404L or equivalent |
+| Cx        | Decoupling     | 100 nF |
+| R-series  | Signal damping | 22-33 Ω |
 
 External PSRAM may store:
+
 - tile graphics
 - sprite images
 - fonts
 - maps
 - off-screen buffers
 - audio samples
-3.4 USB host
-Components
-Reference	Component	Suggested part
-J6	USB-A connector	THT
-U6	USB power switch	AP2553 or similar
-U7	USB ESD protector	USBLC6-2 or similar
-R1–R2	USB series resistors	27 Ω
-F1	Polyfuse	500 mA
-C1	VBUS bulk capacitor	47–100 µF
 
 
-The RP2350 handles:
-- keyboard
-- mouse
-- gamepad
-- firmware update mode
-3.5 Audio
+6. USB Host
+-----------
+
+Use the RP2350B native USB D+/D- pins as the upstream connection to a dedicated
+4-port USB 2.0 hub IC.
+
+Recommended hub IC options:
+
+- CH334
+- SL2.1A
+- FE1.1s, SSOP-28
+
+USB architecture:
+
+- The USB hub and all USB-A connectors live on the daughterboard.
+- Use direct PCB-mounted USB-A receptacles, not wire harnesses.
+- Route USB data lines as tightly coupled 90 Ω differential pairs.
+- Keep USB data traces on one layer where practical and avoid vias.
+- Place ESD protection directly behind every USB-A connector.
+
+Power rules:
+
+- Do not wire USB-A VBUS pins directly to +5V.
+- Use a load switch or power distribution switch per USB-A port.
+- Suitable examples include AP2011 or SY6280 class parts.
+- Provide local VBUS bulk capacitance for the USB port group.
+- Three to four USB ports may draw 1.5-2.0 A total.
+
+Components:
+
+| Reference | Function              | Suggested Part |
+|-----------|-----------------------|----------------|
+| U6        | USB 2.0 hub           | CH334, SL2.1A, or FE1.1s |
+| J6-J9     | USB-A connectors      | THT or hybrid USB-A |
+| Ux        | USB load switches     | AP2011, SY6280, or equivalent |
+| Ux        | USB ESD protection    | USBLC6-2SC6 or equivalent |
+| R-series  | USB damping/series    | As recommended by hub datasheet |
+| Cx        | VBUS bulk capacitance | 47-100 uF minimum per group |
+
+
+7. Storage
+----------
+
+Use a full-size SD card socket on the daughterboard.
+
+Revision A should use 4-bit SDIO through RP2350 PIO rather than SPI mode. A
+14 MHz 65C816 bus cannot consume storage data fast enough to justify a separate
+storage MCU; the RP2350 can handle SDIO and present buffered data to the 65C816
+through registers or FIFOs.
+
+Components:
+
+| Reference | Function        | Suggested Implementation |
+|-----------|-----------------|--------------------------|
+| J10       | SD card socket  | Full-size SD preferred   |
+| Ux        | ESD protection  | Optional, near socket    |
+| R-pull    | Signal pull-ups | 10 kΩ                    |
+| R-series  | Signal damping  | 22-47 Ω                  |
+| Cx        | Local bulk      | 10 uF                    |
+| Cx        | Decoupling      | 100 nF                   |
+
+
+8. Networking
+-------------
+
+Networking is offloaded so the RP2350 does not spend large amounts of time in
+software network stacks.
+
+WiFi:
+
+- Use an ESP32-C3 module pre-flashed with AT command firmware.
+- Communicate with it over SPI.
+- Keep the wireless network stack off the RP2350.
+
+Ethernet:
+
+- Use a WIZnet W5500 IC or module.
+- W5500 provides Ethernet MAC, PHY, and hardwired TCP/IP offload.
+- Communicate with it over SPI.
+
+Components:
+
+| Reference | Function         | Suggested Implementation |
+|-----------|------------------|--------------------------|
+| Ux/MODx   | WiFi offload     | ESP32-C3 AT module       |
+| Ux        | Ethernet offload | WIZnet W5500             |
+| Jx        | RJ45 connector   | Integrated magnetics preferred |
+| LEDx      | Link/activity    | Optional                 |
+
+
+9. Audio
+--------
+
 For revision A, use a socketed DAC module.
-Components
-Reference	Component	Suggested part
-MOD1	I²S DAC module	PCM5102A module
-J7	Audio module headers	2.54 mm female headers
-J8	Stereo audio output	3.5 mm TRS
-Cx	Audio filtering	According to module/design
 
+Components:
 
-Audio functions
+| Reference | Function             | Suggested Part |
+|-----------|----------------------|----------------|
+| MODx      | I2S DAC module       | PCM5102A module |
+| Jx        | Audio module headers | 2.54 mm female headers |
+| Jx        | Stereo audio output  | 3.5 mm TRS |
+| Cx        | Audio filtering      | According to module/design |
+
+Audio functions:
+
 - PSG-style waveforms
 - wavetable synthesis
 - PCM sample playback
@@ -434,165 +749,215 @@ Audio functions
 - stereo panning
 - software mixing
 - optional MIDI support
-3.6 SD-card storage
-Components
-Reference	Component	Suggested implementation
-J9	Full-size SD or microSD	Socket/module
-U8	ESD protection	Optional
-R-pull	Signal pull-ups	10 kΩ
-R-series	Clock/data damping	22–47 Ω
-C1	Local bulk	10 µF
-C2	Decoupling	100 nF
 
 
-SPI mode should be used initially. SDIO support may be added later.
-3.7 Ethernet
-For revision A, use a socketed W5500 module.
-Components
-Reference	Component	Suggested implementation
-MOD2	Ethernet module	W5500 module
-J10	Module socket	2.54 mm female headers
-LEDx	Link/activity indicators	Optional
+10. Controller Ports and GPIO
+-----------------------------
+
+Controller support should use USB-compliant HID gamepads through the
+daughterboard USB hub. The extra buttons needed by modern games are better
+handled by standard USB gamepads than by dedicated legacy controller ports.
+
+Components:
+
+| Reference | Function         | Purpose |
+|-----------|------------------|---------|
+| Jx        | Controller ports | USB HID gamepads through USB-A hub ports |
+| R-series  | Input protection | 330 Ω to 1 kΩ |
+| R-pull    | Pull-ups         | 10 kΩ |
+| Jx        | GPIO expansion   | General I/O |
+| Jx        | I2C/Qwiic header | External devices |
+| Jx        | UART header      | Debug or serial devices |
+| Jx        | MIDI interface   | Optional |
 
 
-The RP2350 communicates with W5500 through SPI.
-3.8 Controller ports and GPIO
-Components
-Reference	Component	Purpose
-J11–J12	DB9 joystick connectors	Retro controllers
-R-series	330 Ω–1 kΩ	Input protection
-R-pull	10 kΩ	Pull-ups
-J13	GPIO expansion header	General I/O
-J14	I²C/Qwiic header	External devices
-J15	UART header	Debug or serial devices
-J16	MIDI interface	Optional
+Software-Visible Hardware Model
+===============================
 
+The RP2350 behaves like a hardware chipset, not like a user-programmable
+general ARM computer. The W65C816 sends compact commands and data structures
+through memory-mapped registers and FIFOs.
 
-The joystick connectors may alternatively be placed on the mainboard and wired through J2.
-4. Software-visible hardware model
-The RP2350 should behave like a hardware chipset rather than a general ARM computer.
-The W65C816 sends compact commands and data structures.
 Example sprite structure:
-byte 0   enabled/flags
-byte 1   sprite number
-byte 2   X low
-byte 3   X high
-byte 4   Y
-byte 5   palette
-byte 6   size
-byte 7   priority
+
+| Byte | Field |
+|------|-------|
+| 0    | enabled / flags |
+| 1    | sprite number |
+| 2    | X low |
+| 3    | X high |
+| 4    | Y |
+| 5    | palette |
+| 6    | size |
+| 7    | priority |
+
 Example video registers:
-VIDEO_MODE
-FRAMEBUFFER_PAGE
-BACKGROUND_COLOUR
-BG0_MAP_ADDRESS
-BG0_SCROLL_X
-BG0_SCROLL_Y
-BG1_MAP_ADDRESS
-BG1_SCROLL_X
-BG1_SCROLL_Y
-SPRITE_TABLE_ADDRESS
-PALETTE_ADDRESS
-RASTER_IRQ_LINE
-FRAME_READY
-VIDEO_STATUS
+
+- VIDEO_MODE
+- FRAMEBUFFER_PAGE
+- BACKGROUND_COLOUR
+- BG0_MAP_ADDRESS
+- BG0_SCROLL_X
+- BG0_SCROLL_Y
+- BG1_MAP_ADDRESS
+- BG1_SCROLL_X
+- BG1_SCROLL_Y
+- SPRITE_TABLE_ADDRESS
+- PALETTE_ADDRESS
+- RASTER_IRQ_LINE
+- FRAME_READY
+- VIDEO_STATUS
+
 Example audio registers:
-AUDIO_COMMAND
-CHANNEL_NUMBER
-WAVEFORM
-FREQUENCY_LOW
-FREQUENCY_HIGH
-VOLUME
-PAN
-ENVELOPE
-SAMPLE_ADDRESS
-SAMPLE_LENGTH
-5. Initial development stages
-Stage 1: CPU boot
+
+- AUDIO_COMMAND
+- CHANNEL_NUMBER
+- WAVEFORM
+- FREQUENCY_LOW
+- FREQUENCY_HIGH
+- VOLUME
+- PAN
+- ENVELOPE
+- SAMPLE_ADDRESS
+- SAMPLE_LENGTH
+
+
+Development Stages
+==================
+
+Stage 1: CPU Boot
+-----------------
+
 Populate only:
+
 - W65C816
 - clock oscillator
 - bank-address latch
-- one SRAM
-- boot flash
+- eight SRAM sockets, with only U20 required to be populated for bring-up
+- boot Flash
 - address decoder
 - reset circuit
 - debug header
+- 5 A-rated mainboard power input and 3.3 V regulator
+
 Goal:
-Fetch reset vector
-Execute ROM code
-Write known patterns to SRAM
-Output status through GPIO or debug port
-Stage 2: RP2350 register interface
+
+- fetch reset vector
+- execute ROM code
+- write known patterns to SRAM
+- output status through GPIO or debug port
+
+
+Stage 2: RP2350 Register Interface
+----------------------------------
+
 Add:
-- J1/J2 connectors
+
+- J1/J2 board-to-board connectors
 - RP2350 daughterboard
 - data transceiver
 - address/control buffer
 - simple status and command registers
+
 Goal:
-W65C816 writes a byte
-RP2350 receives it
-RP2350 returns a byte
-IRQ signalling works
-Stage 3: video
+
+- W65C816 writes a byte to RP2350 register space
+- RP2350 receives it
+- RP2350 returns a byte
+- IRQ signalling works
+
+
+Stage 3: Video
+--------------
+
 Add:
-- HDMI output
+
+- DVI/HDMI output
 - basic framebuffer
 - text console
-- 320 × 240 indexed mode
-Goal:
-Display boot messages
-Display memory test results
-Draw tiles and sprites
-Stage 4: storage and input
-Add:
-- SD card
-- USB keyboard
-- gamepad support
-Stage 5: audio and networking
-Add:
-- PCM5102A
-- synthesizer
-- W5500 Ethernet
-6. Main component summary
-Mainboard socketed ICs
-1 × W65C816S6PG-14
-1 × 74HC573
-2 × 74HC245
-2 × 74HC138
-1 × 74HC139
-1 × 74HC00
-1 × 74HC04
-1 × 74HC08
-1 × 74HC32
-1 × 74HC74
-1 × 74HC125
-1 × 74HC541
-1 × 74HC14
+- 320 x 240 indexed bitmap mode
+- revision A minimum video modes
 
-1–8 × AS6C4008-55PCN SRAM
-1 × SST39VF040 Flash in PLCC socket
-Mainboard modules and connectors
-2 × 2×20 daughterboard connectors
-1 × 3.3 V buck regulator module
-1 × expansion-bus connector
-1 × logic-analyser header
-1 × 5 V power input
-1 × reset button
-1 × NMI button
-1 × socketed oscillator
-Daughterboard major components
-1 × RP2350B
-1 × QSPI Flash
-1 × 12 MHz crystal
-1 × RP2350 core regulator
-1 × HDMI Type-A connector
-1 × optional PSRAM
-1 × USB-A connector
-1 × USB power switch
-1 × PCM5102A module
-1 × SD-card socket/module
-1 × W5500 module
-2 × matching 2×20 male headers
-This gives you a clear boundary: the mainboard remains a genuine, largely socketed 65C816 computer, while the daughterboard contains the unavoidable modern SMD and high-speed circuitry.
+Goal:
+
+- display boot messages
+- display memory test results
+- draw tiles and sprites
+
+
+Stage 4: Storage and Input
+--------------------------
+
+Add:
+
+- SDIO full-size SD card
+- USB hub
+- USB keyboard
+- USB mouse
+- USB HID gamepads
+
+
+Stage 5: Audio and Networking
+-----------------------------
+
+Add:
+
+- PCM5102A audio module or equivalent
+- synthesizer/audio engine
+- W5500 Ethernet
+- ESP32-C3 WiFi offload module
+
+
+Main Component Summary
+======================
+
+Mainboard socketed ICs and modules:
+
+- 1 x W65C816S6PG-14
+- 1 x 74HC573
+- 2 x 74HC245
+- 2 x 74HC138
+- 1 x 74HC139
+- 1 x 74HC00
+- 1 x 74HC04
+- 1 x 74HC08
+- 1 x 74HC32
+- 1 x 74HC74
+- 1 x 74HC125
+- 1 x 74HC541
+- 1 x 74HC14
+- 8 x AS6C4008-55PCN SRAM sockets
+- 1 x SST39VF040 Flash in PLCC socket
+- 1 x socketed 3.3 V buck regulator module
+
+Mainboard connectors and controls:
+
+- 2 x 2x20 daughterboard connectors
+- 1 x expansion-bus connector
+- 1 x logic-analyser header
+- 1 x PJ-102AH 5 A-rated 5 V DC input connector
+- 1 x main power switch
+- 1 x reset button
+- 1 x NMI button
+- 1 x socketed oscillator
+
+Daughterboard major components:
+
+- 1 x RP2350B
+- 1 x QSPI Flash
+- 1 x 12 MHz crystal
+- 1 x RP2350 core regulator
+- 1 x DVI/HDMI connector
+- 1 x optional PSRAM
+- 1 x 4-port USB 2.0 hub
+- 4 x USB-A connectors
+- 4 x USB power/load switches
+- 1 x full-size SD card socket
+- 1 x W5500 Ethernet IC or module
+- 1 x ESP32-C3 WiFi module
+- 1 x PCM5102A audio module
+- 2 x matching 2x20 male headers
+
+The boundary remains simple: the mainboard is a genuine, mostly socketed
+65C816 computer; the daughterboard carries the unavoidable modern SMD and
+high-speed circuitry.
