@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+
+  (lib (name "W65C816_Connector") (type "KiCad") (uri "${KIPRJMOD}/W65C816-Computer.pretty") (options "") (descr "")))

@@ -42,7 +42,7 @@ memory-mapped I/O device.
 
 High-level block diagram:
 
-W65C816 CPU
+W65C816 CPU (W65C816S6PG-14)
   -> 24-bit address bus / 8-bit data bus
   -> SRAM and boot Flash
   -> address decoding / glue logic
@@ -234,7 +234,7 @@ Revision A boot decode:
 - /OE and /WE are derived from R/W.
 
 
-5. RP2350 Mainboard Interface
+5. RP2350 Mainboard Interface (RP2350B or RP2354B)
 -----------------------------
 
 The RP2350 daughterboard is memory-mapped. The mainboard address decoder
@@ -292,74 +292,79 @@ Suggested RP2350 register groups:
 6. Daughterboard Connectors
 ---------------------------
 
-Use two parallel 2x20, 2.54 mm board-to-board connectors.
+Use one modern through-hole card-edge connector so the RP2350 daughterboard
+plugs in like an expansion card. The mainboard carries the female card-edge
+socket. The daughterboard carries matching PCB edge fingers.
+
+Connector basis:
+
+- 80 contacts total
+- dual row, 2 x 40
+- 2.54 mm / 0.100 inch contact pitch
+- 1.6 mm / 0.062 inch daughtercard thickness
+- through-hole PC tails on the mainboard socket
+- EDAC 395-series vertical socket or equivalent Sullins/EBC-style part
+
+The exact manufacturer suffix should be frozen before PCB layout so mounting
+ears, card guides, and keying can be reflected in the footprint.
 
 Components:
 
-| Reference | Function                   | Suggested Part        |
-|-----------|----------------------------|-----------------------|
-| J1        | CPU/control connector      | Samtec SSW-120-02-G-D |
-| J2        | Peripheral/power connector | Samtec SSW-120-02-G-D |
-| MH1-MH2   | Daughterboard supports     | M3 mounting holes     |
+| Reference | Function                    | Suggested Part |
+|-----------|-----------------------------|----------------|
+| J6        | Daughterboard card-edge bus | EDAC 395-series 80-contact vertical THT socket or equivalent |
+| MH1-MH2   | Daughterboard support       | M3 standoffs aligned to card-edge insertion force |
 
-The mainboard uses female sockets. The daughterboard uses matching male
-headers.
+J6: daughterboard card-edge bus:
 
-J1: CPU interface:
-
-| Pin | Signal      | Pin | Signal      |
-|-----|-------------|-----|-------------|
-| 1   | GND         | 2   | GND         |
-| 3   | D0          | 4   | D1          |
-| 5   | D2          | 6   | D3          |
-| 7   | D4          | 8   | D5          |
-| 9   | D6          | 10  | D7          |
-| 11  | A0          | 12  | A1          |
-| 13  | A2          | 14  | A3          |
-| 15  | A4          | 16  | A5          |
-| 17  | A6          | 18  | A7          |
-| 19  | PHI2        | 20  | R/W         |
-| 21  | /RP_CS      | 22  | /RESET      |
-| 23  | /IRQ        | 24  | /NMI        |
-| 25  | RDY         | 26  | BE          |
-| 27  | VDA         | 28  | VPA         |
-| 29  | DMA_REQ     | 30  | DMA_ACK     |
-| 31  | ROM_OVERLAY | 32  | FRAME_IRQ   |
-| 33  | AUDIO_IRQ   | 34  | IO_IRQ      |
-| 35  | GPIO_SPARE0 | 36  | GPIO_SPARE1 |
-| 37  | 3V3         | 38  | 3V3         |
-| 39  | GND         | 40  | GND         |
-
-J2: peripheral and power interface:
-
-| Pin | Signal   | Pin | Signal    |
-|-----|----------|-----|-----------|
-| 1   | GND      | 2   | GND       |
-| 3   | SD_CLK   | 4   | SD_CMD    |
-| 5   | SD_D0    | 6   | SD_D1     |
-| 7   | SD_D2    | 8   | SD_D3     |
-| 9   | I2S_BCLK | 10  | I2S_LRCLK |
-| 11  | I2S_DATA | 12  | I2S_MCLK  |
-| 13  | SPI_CLK  | 14  | SPI_MOSI  |
-| 15  | SPI_MISO | 16  | SPI_CS    |
-| 17  | USB_D+   | 18  | USB_D-    |
-| 19  | UART_TX  | 20  | UART_RX   |
-| 21  | I2C_SDA  | 22  | I2C_SCL   |
-| 23  | JOY1_IRQ | 24  | JOY2_IRQ  |
-| 25  | GPIO0    | 26  | GPIO1     |
-| 27  | GPIO2    | 28  | GPIO3     |
-| 29  | GPIO4    | 30  | GPIO5     |
-| 31  | GPIO6    | 32  | GPIO7     |
-| 33  | 5V       | 34  | 5V        |
-| 35  | 3V3      | 36  | 3V3       |
-| 37  | GND      | 38  | GND       |
-| 39  | GND      | 40  | GND       |
+| Pin | Signal       | Pin | Signal       |
+|-----|--------------|-----|--------------|
+| 1   | GND          | 2   | +3V3         |
+| 3   | A0           | 4   | SYS_D0       |
+| 5   | A1           | 6   | SYS_D1       |
+| 7   | A2           | 8   | SYS_D2       |
+| 9   | A3           | 10  | SYS_D3       |
+| 11  | A4           | 12  | SYS_D4       |
+| 13  | A5           | 14  | SYS_D5       |
+| 15  | A6           | 16  | SYS_D6       |
+| 17  | A7           | 18  | SYS_D7       |
+| 19  | GND          | 20  | +3V3         |
+| 21  | A8           | 22  | A16          |
+| 23  | A9           | 24  | A17          |
+| 25  | A10          | 26  | A18          |
+| 27  | A11          | 28  | A19          |
+| 29  | A12          | 30  | A20          |
+| 31  | A13          | 32  | A21          |
+| 33  | A14          | 34  | A22          |
+| 35  | A15          | 36  | A23          |
+| 37  | GND          | 38  | +5V          |
+| 39  | GND          | 40  | +5V          |
+| 41  | GND          | 42  | +3V3         |
+| 43  | PHI2         | 44  | R/W          |
+| 45  | /RESET       | 46  | RDY          |
+| 47  | /IRQ         | 48  | /NMI         |
+| 49  | VDA          | 50  | VPA          |
+| 51  | BE           | 52  | /ABORT       |
+| 53  | VPB          | 54  | MLB          |
+| 55  | E            | 56  | MX           |
+| 57  | BANK00       | 58  | /BANK00      |
+| 59  | /MEM_OE      | 60  | /MEM_WE      |
+| 61  | /ROM_CS      | 62  | /RAM_BLOCK0  |
+| 63  | /RP_CS       | 64  | /IO_CS       |
+| 65  | /IO_RD       | 66  | /IO_WR       |
+| 67  | DMA_REQ      | 68  | DMA_ACK      |
+| 69  | ROM_OVERLAY  | 70  | FRAME_IRQ    |
+| 71  | AUDIO_IRQ    | 72  | IO_IRQ       |
+| 73  | /EXP_CS      | 74  | DB_GPIO0     |
+| 75  | DB_GPIO1     | 76  | DB_GPIO2     |
+| 77  | GND          | 78  | +3V3         |
+| 79  | DB_GPIO3     | 80  | GND          |
 
 Power note:
 
 The daughterboard will host USB-A ports and should receive several 5 V and GND
-connections through the board-to-board connector. USB port current limiting
-belongs on the daughterboard, close to the USB connectors.
+connections through the card-edge connector. USB port current limiting belongs
+on the daughterboard, close to the USB connectors.
 
 
 7. Expansion Bus
@@ -853,7 +858,7 @@ Stage 2: RP2350 Register Interface
 
 Add:
 
-- J1/J2 board-to-board connectors
+- J6 card-edge daughterboard connector
 - RP2350 daughterboard
 - data transceiver
 - address/control buffer
@@ -932,7 +937,7 @@ Mainboard socketed ICs and modules:
 
 Mainboard connectors and controls:
 
-- 2 x 2x20 daughterboard connectors
+- 1 x 80-contact daughterboard card-edge connector
 - 1 x expansion-bus connector
 - 1 x logic-analyser header
 - 1 x PJ-102AH 5 A-rated 5 V DC input connector
@@ -956,7 +961,7 @@ Daughterboard major components:
 - 1 x W5500 Ethernet IC or module
 - 1 x ESP32-C3 WiFi module
 - 1 x PCM5102A audio module
-- 2 x matching 2x20 male headers
+- 1 x matching 80-contact PCB edge-finger interface
 
 The boundary remains simple: the mainboard is a genuine, mostly socketed
 65C816 computer; the daughterboard carries the unavoidable modern SMD and
