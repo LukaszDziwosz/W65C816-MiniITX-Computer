@@ -180,8 +180,6 @@ Make and verify one subsystem at a time.
 
 ### Immediate actions:
 
-C13, C14, C15 and R7 have no footprints. These include the new glue-logic decoupling and the fail-safe U16_OE_N pull-up, so PCB synchronization should wait until they are assigned.
-
 Think about ESP32 C3 role
                     ┌──────────── Wi-Fi
                     │
@@ -197,6 +195,7 @@ W65C816 bus
                      │
                      └── W5500
 
+Also consider that we still need to add full size SD card for storage, and USB Hub do we have enough pins on RP
 
 ### Stage 1: Document and decode the interface
 
