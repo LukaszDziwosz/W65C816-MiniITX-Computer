@@ -180,9 +180,6 @@ Make and verify one subsystem at a time.
 
 ### Immediate actions:
 
-Hardware-safe RDY and IRQ_N driving remains unresolved.
-They currently connect directly to RP2354 GPIOs. Firmware can emulate open-drain operation by driving low or switching to high impedance, but the design plan explicitly requires an open-drain interface. A small MOSFET or open-drain buffer would prevent accidental high-level contention during boot, crashes or firmware development.
-
 C13, C14, C15 and R7 have no footprints. These include the new glue-logic decoupling and the fail-safe U16_OE_N pull-up, so PCB synchronization should wait until they are assigned.
 
 Think about ESP32 C3 role
@@ -192,13 +189,14 @@ W65C816 ⇄ RP2350B ⇄ ESP32-C3
                     │
                     └── SPI ⇄ W5500 ⇄ Ethernet
 
-However, I would consider connecting the ESP32-C3 directly to the W65C816 bus interface, rather than routing all network traffic through the RP2350B:
+I would consider connecting the ESP32-C3 directly to the W65C816 bus interface, rather than routing all network traffic through the RP2350B:
 
 W65C816 bus
     ├── RP2350B: video, audio, USB, SD, system I/O
     └── ESP32-C3: Wi-Fi, Ethernet and network services
                      │
                      └── W5500
+
 
 ### Stage 1: Document and decode the interface
 

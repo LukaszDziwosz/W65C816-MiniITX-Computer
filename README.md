@@ -20,6 +20,8 @@ To avoid designing a completely custom enclosure, I chose the Mini-ITX form fact
 
 A 90-degree ISA adapter will connect the daughterboard to this slot. The RP2354B based daughterboard will sit horizontally above the mainboard and will be secured using standoffs in the same area where a CPU cooler would normally be mounted on a Mini-ITX motherboard.
 
+Solid-62 case is initially chosen for the project as it has 2 x USB A in the front for gamepads, dc power cutout and on/off locking switch cu out.
+
 The daughterboard is planned to include:
 
 an HDMI output,
