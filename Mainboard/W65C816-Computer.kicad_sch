@@ -22376,6 +22376,10 @@
 		(at 317.5 279.4)
 		(uuid "f914595b-4bc0-40fb-a85b-2fcc8c8179f1")
 	)
+	(no_connect
+		(at 375.92 304.8)
+		(uuid "b07e6d70-7526-456a-ab6d-58b4ed71802c")
+	)
 	(wire
 		(pts
 			(xy 99.06 27.94)
@@ -22827,6 +22831,41 @@
 			(xy 58.42 62.23)
 		)
 		(uuid "8cedb49e-b8bb-47c2-ad50-918a93320a04")
+	)
+	(wire
+		(pts
+			(xy 402.59 289.56)
+			(xy 402.59 292.1)
+		)
+		(uuid "d832abdd-186d-499f-bd95-b4e04cc363a5")
+	)
+	(wire
+		(pts
+			(xy 430.53 289.56)
+			(xy 430.53 292.1)
+		)
+		(uuid "8a3ff6a6-2094-4c40-8625-5af0b58e82e4")
+	)
+	(wire
+		(pts
+			(xy 458.47 289.56)
+			(xy 458.47 292.1)
+		)
+		(uuid "6324091a-bc7a-4904-a103-d1dde5917d2a")
+	)
+	(wire
+		(pts
+			(xy 422.91 199.39)
+			(xy 420.37 199.39)
+		)
+		(uuid "9f8a3aec-9edc-416d-8691-7a8e4fb40ae7")
+	)
+	(wire
+		(pts
+			(xy 438.15 201.93)
+			(xy 440.69 201.93)
+		)
+		(uuid "d4d30597-b8a4-49c6-9198-04f28f5d56a1")
 	)
 	(text "Power input: PJ-102A barrel jack is center-positive and rated 2.5 A. +5V is fused, switched, reverse-polarity protected by Q1, TVS-clamped, then feeds the daughterboard power connector and MOD1 3.3 V buck module."
 		(at 19.812 216.154 0)
@@ -25877,16 +25916,6 @@
 			(justify right bottom)
 		)
 		(uuid "7e356a37-9e58-441a-a90f-ca34d555f808")
-	)
-	(label "RP_CS_N"
-		(at 375.92 304.8 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "7e57f31c-e067-4e07-9103-78a05c11cb2a")
 	)
 	(label "DMA_ACK"
 		(at 552.45 194.31 0)
@@ -29827,6 +29856,56 @@
 			(justify right bottom)
 		)
 		(uuid "5311533e-7188-4c81-a7ec-30512f31a6f5")
+	)
+	(label "U16_OE_N"
+		(at 402.59 292.1 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "b72f33a6-1ecf-4571-a3e8-e25d8af1f9eb")
+	)
+	(label "SYS_D0"
+		(at 430.53 292.1 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "1b55b46b-30c8-4d13-b6d7-718e57caa18b")
+	)
+	(label "RP_D0"
+		(at 458.47 292.1 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "24b62c07-3181-4445-b13a-0392c50e9468")
+	)
+	(label "IO_CS_N"
+		(at 420.37 199.39 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "a2874ba2-eb48-4c10-a9dd-0c28d5be056b")
+	)
+	(label "RP_CS_N"
+		(at 440.69 201.93 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "80ac309e-5ef4-439a-9ae8-4614e76326cf")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
@@ -47127,7 +47206,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Package_DIP:DIP-20_W7.62mm_Socket_LongPads"
 			(at 430.53 250.19 0)
 			(hide yes)
 			(effects
@@ -47439,7 +47518,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Package_DIP:DIP-14_W7.62mm_Socket_LongPads"
 			(at 389.89 219.71 0)
 			(hide yes)
 			(effects
@@ -47490,7 +47569,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Package_DIP:DIP-14_W7.62mm_Socket_LongPads"
 			(at 389.89 250.19 0)
 			(hide yes)
 			(effects
@@ -47541,7 +47620,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Package_DIP:DIP-14_W7.62mm_Socket_LongPads"
 			(at 389.89 279.4 0)
 			(hide yes)
 			(effects
@@ -47592,7 +47671,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Package_DIP:DIP-14_W7.62mm_Socket_LongPads"
 			(at 389.89 314.96 0)
 			(hide yes)
 			(effects
@@ -47643,7 +47722,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Package_DIP:DIP-14_W7.62mm_Socket_LongPads"
 			(at 430.53 299.72 0)
 			(hide yes)
 			(effects
@@ -47694,7 +47773,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Package_DIP:DIP-14_W7.62mm_Socket_LongPads"
 			(at 430.53 330.2 0)
 			(hide yes)
 			(effects
@@ -48598,6 +48677,262 @@
 			(project "W65C816-Computer"
 				(path "a4bc8387-953d-4bdb-a0f8-9d74e7b38b13"
 					(reference "J8")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 402.59 289.56 0)
+		(unit 1)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "1d3de5af-cfac-48bc-b1e0-b727a0ad0fb2")
+		(property "Reference" "TP31"
+			(at 402.59 282.702 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "U16_OE_N"
+			(at 402.59 284.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_THTPad_D1.5mm_Drill0.7mm"
+			(at 402.59 289.56 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 402.59 289.56 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "W65C816-Computer"
+				(path "a4bc8387-953d-4bdb-a0f8-9d74e7b38b13"
+					(reference "TP31")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 430.53 289.56 0)
+		(unit 1)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "d580fa92-6584-4ed4-81a0-1604c8dac6f7")
+		(property "Reference" "TP32"
+			(at 430.53 282.702 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "SYS_D0"
+			(at 430.53 284.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_THTPad_D1.5mm_Drill0.7mm"
+			(at 430.53 289.56 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 430.53 289.56 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "W65C816-Computer"
+				(path "a4bc8387-953d-4bdb-a0f8-9d74e7b38b13"
+					(reference "TP32")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 458.47 289.56 0)
+		(unit 1)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "bb73329c-fd32-467f-8345-4e5fb288c2c4")
+		(property "Reference" "TP33"
+			(at 458.47 282.702 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "RP_D0"
+			(at 458.47 284.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_THTPad_D1.5mm_Drill0.7mm"
+			(at 458.47 289.56 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 458.47 289.56 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "W65C816-Computer"
+				(path "a4bc8387-953d-4bdb-a0f8-9d74e7b38b13"
+					(reference "TP33")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "W65C816-Computer:74HC32")
+		(at 430.53 201.93 0)
+		(unit 4)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "f5a65bf0-d79d-427c-846f-4ac8f44507a1")
+		(property "Reference" "U17"
+			(at 430.53 195.58 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "SN74HC32N"
+			(at 430.53 208.28 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Package_DIP:DIP-14_W7.62mm_Socket_LongPads"
+			(at 430.53 201.93 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 430.53 201.93 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "W65C816-Computer"
+				(path "a4bc8387-953d-4bdb-a0f8-9d74e7b38b13"
+					(reference "U17")
+					(unit 4)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 422.91 204.47 0)
+		(unit 1)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "5500385c-9eae-4b1f-8315-38c1b80ce92e")
+		(property "Reference" "#PWR028"
+			(at 422.91 210.82 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 422.91 208.28 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 422.91 204.47 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 422.91 204.47 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "W65C816-Computer"
+				(path "/a4bc8387-953d-4bdb-a0f8-9d74e7b38b13"
+					(reference "#PWR028")
 					(unit 1)
 				)
 			)

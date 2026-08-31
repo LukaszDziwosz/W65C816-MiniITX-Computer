@@ -863,7 +863,7 @@ Stage 2: RP2350 Register Interface
 
 Add:
 
-- J6 card-edge daughterboard connector
+- Card-edge daughterboard connector
 - RP2350 daughterboard
 - data transceiver
 - address/control buffer
@@ -902,9 +902,9 @@ Add:
 
 - SDIO full-size SD card
 - USB hub
-- USB keyboard
-- USB mouse
-- USB HID gamepads
+- USB keyboard (physical USB A)
+- USB mouse (pysical USB A)
+- USB HID gamepads (dual USB A header)
 
 
 Stage 5: Audio and Networking

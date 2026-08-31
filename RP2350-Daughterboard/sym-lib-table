@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+
+  (lib (name "W65C816-Computer") (type "KiCad") (uri "${KIPRJMOD}/../Mainboard/W65C816-Computer.kicad_sym") (options "") (descr "")))

@@ -178,20 +178,34 @@ pending until its underlying condition is resolved.
 
 Make and verify one subsystem at a time.
 
+### Immediate actions:
+Add one more PSRAM maybe even 3 more, they are cheap but only if they can be connected in series so we don't use more gpios.
+
+RP2354B decoupling is insufficient.
+The core currently has one 100 nF capacitor on +3V3 and one on +1V1, plus one 4.7 µF capacitor per rail. RP2350 guidance recommends approximately one 100 nF capacitor per power pin, with only documented exceptions. This needs to be expanded before layout, especially around IOVDD, DVDD, QSPI_IOVDD, USB_OTP_VDD, ADC_AVDD and VREG supplies. Official hardware design guide
+
+The HDMI filter arrangement is not valid yet.
+Both sides of every U3 TPD8F003 channel use the same net name, so PCB routing would be free to bypass the series filter path. Separate source-side and connector-side nets are required. More importantly, TPD8F003 contains a 100 Ω C-R-C filter with 17 pF capacitance and only 200 MHz bandwidth, in addition to the existing 270 Ω HSTX resistors. It is not a good TMDS protection choice. Use a low-capacitance HDMI/DVI ESD array or the official HSTX reference arrangement. TI TPD8F003 datasheet
+
+Hardware-safe RDY and IRQ_N driving remains unresolved.
+They currently connect directly to RP2354 GPIOs. Firmware can emulate open-drain operation by driving low or switching to high impedance, but the design plan explicitly requires an open-drain interface. A small MOSFET or open-drain buffer would prevent accidental high-level contention during boot, crashes or firmware development.
+
+C13, C14, C15 and R7 have no footprints. These include the new glue-logic decoupling and the fail-safe U16_OE_N pull-up, so PCB synchronization should wait until they are assigned.
+
 ### Stage 1: Document and decode the interface
 
-- [ ] Update `board_design.txt` from `A0-A7` to `A0-A9`.
-- [ ] Replace the shared-memory-window proposal with indirect PSRAM access.
+- [x] Update `board_design.txt` from `A0-A7` to `A0-A9`.
+- [x] Replace the shared-memory-window proposal with indirect PSRAM access.
 - [ ] Document whether the 1 KiB RP interface intentionally mirrors throughout
       `$F00000-$F1FFFF`.
 - [ ] Verify the exact `RP_CS_N` decode truth table.
 - [ ] Add `BUS_VALID = VDA OR VPA` qualification to side-effecting accesses.
-- [ ] Run ERC.
+- [x] Run ERC.
 
 ### Stage 2: Add the RP data path
 
 - [ ] Add socketed U16 and local 100 nF decoupling.
-- [ ] Rename the connector-side data nets to `RP_D0-RP_D7` if U16 is placed on
+- [x] Rename the connector-side data nets to `RP_D0-RP_D7` if U16 is placed on
       the mainboard.
 - [ ] Implement `DIR`, fail-safe `/OE`, and valid-cycle qualification.
 - [ ] Add test points for `RP_CS_N`, `U16_OE_N`, `RWB`, `PHI2`, `RDY`, and at
@@ -211,8 +225,8 @@ Make and verify one subsystem at a time.
 
 ### Stage 4: Build the daughterboard bus engine
 
-- [ ] Place the RP2350B/RP2354B core using the official reference design.
-- [ ] Assign contiguous GPIO ranges suitable for PIO to `A0-A9`, `RP_D0-RP_D7`,
+- [x] Place the RP2350B/RP2354B core using the official reference design.
+- [x] Assign contiguous GPIO ranges suitable for PIO to `A0-A9`, `RP_D0-RP_D7`,
       and bus controls.
 - [ ] Implement PIO bus sampling and data direction.
 - [ ] Implement conservative `RDY` wait-state handling.
