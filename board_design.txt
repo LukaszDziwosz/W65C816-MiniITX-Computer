@@ -243,22 +243,17 @@ complete 24-bit address bus.
 
 Signals to the daughterboard:
 
-- D0-D7
-- A0-A7
+- RP_D0-RP_D7 (through the mainboard 74HC245 transceiver)
+- A0-A9
 - PHI2
 - R/W
 - /RP_CS
 - /RESET
-- /IRQ
-- /NMI
+- VDA
+- VPA
 - RDY
-- BE
-- DMA_REQ
-- DMA_ACK
-- ROM_OVERLAY
-- FRAME_IRQ
-- AUDIO_IRQ
-- IO_IRQ
+- RP_IRQ_N
+- A10-A23 reserved raw-bus signals
 - GPIO_SPARE0
 - GPIO_SPARE1
 - 3.3 V
@@ -273,7 +268,17 @@ Proposed memory map:
 | $F00100-$F001FF | Command FIFO                  |
 | $F00200-$F002FF | Response FIFO                 |
 | $F00300-$F003FF | Input-event FIFO              |
-| $F10000-$F1FFFF | Optional shared-memory window |
+
+The four 256-byte pages use A8-A9 as the page select. Revision A does not
+expose a direct shared-memory window. The existing partial decode may mirror
+the 1 KiB interface through $F00000-$F1FFFF; this must be confirmed from the
+implemented decode truth table before firmware depends on the mirrors.
+
+The RP2350 must not drive the CPU data bus during an unselected, invalid, or
+reset cycle. `VDA` and `VPA` qualify valid bus cycles, and `/RP_CS` selects the
+RP2350 address region. `RP_IRQ_N` is the single active-low interrupt returned
+by the daughterboard; frame, audio, and I/O interrupt groups remain internal
+to the RP2350.
 
 Suggested RP2350 register groups:
 
