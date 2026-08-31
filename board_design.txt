@@ -487,7 +487,6 @@ Power rails:
 
 Current planning:
 
-- Use PJ-102AH as the 5 A-rated input connector for the final board.
 - The RP2350 daughterboard can contain several USB-A ports. Three to four USB
   ports can draw 1.5-2.0 A before the daughterboard electronics are counted.
 - The daughterboard must not connect USB-A VBUS directly to +5V. Use one
