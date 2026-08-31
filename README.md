@@ -18,7 +18,7 @@ The mainboard will contain the W65C816 CPU, RAM, ROM, bus logic, and other easil
 
 To avoid designing a completely custom enclosure, I chose the Mini-ITX form factor for the mainboard. In the position where a PCI Express graphics card connector would normally be located, the board will instead use a 16-bit ISA-style slot. This is only the physical connector; the computer will not use the actual ISA bus standard.
 
-A 90-degree ISA adapter will connect the daughterboard to this slot. The daughterboard will sit horizontally above the mainboard and will be secured using standoffs in the same area where a CPU cooler would normally be mounted on a Mini-ITX motherboard.
+A 90-degree ISA adapter will connect the daughterboard to this slot. The RP2354B based daughterboard will sit horizontally above the mainboard and will be secured using standoffs in the same area where a CPU cooler would normally be mounted on a Mini-ITX motherboard.
 
 The daughterboard is planned to include:
 

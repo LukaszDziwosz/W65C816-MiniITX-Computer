@@ -179,18 +179,26 @@ pending until its underlying condition is resolved.
 Make and verify one subsystem at a time.
 
 ### Immediate actions:
-Add one more PSRAM maybe even 3 more, they are cheap but only if they can be connected in series so we don't use more gpios.
-
-RP2354B decoupling is insufficient.
-The core currently has one 100 nF capacitor on +3V3 and one on +1V1, plus one 4.7 µF capacitor per rail. RP2350 guidance recommends approximately one 100 nF capacitor per power pin, with only documented exceptions. This needs to be expanded before layout, especially around IOVDD, DVDD, QSPI_IOVDD, USB_OTP_VDD, ADC_AVDD and VREG supplies. Official hardware design guide
-
-The HDMI filter arrangement is not valid yet.
-Both sides of every U3 TPD8F003 channel use the same net name, so PCB routing would be free to bypass the series filter path. Separate source-side and connector-side nets are required. More importantly, TPD8F003 contains a 100 Ω C-R-C filter with 17 pF capacitance and only 200 MHz bandwidth, in addition to the existing 270 Ω HSTX resistors. It is not a good TMDS protection choice. Use a low-capacitance HDMI/DVI ESD array or the official HSTX reference arrangement. TI TPD8F003 datasheet
 
 Hardware-safe RDY and IRQ_N driving remains unresolved.
 They currently connect directly to RP2354 GPIOs. Firmware can emulate open-drain operation by driving low or switching to high impedance, but the design plan explicitly requires an open-drain interface. A small MOSFET or open-drain buffer would prevent accidental high-level contention during boot, crashes or firmware development.
 
 C13, C14, C15 and R7 have no footprints. These include the new glue-logic decoupling and the fail-safe U16_OE_N pull-up, so PCB synchronization should wait until they are assigned.
+
+Think about ESP32 C3 role
+                    ┌──────────── Wi-Fi
+                    │
+W65C816 ⇄ RP2350B ⇄ ESP32-C3
+                    │
+                    └── SPI ⇄ W5500 ⇄ Ethernet
+
+However, I would consider connecting the ESP32-C3 directly to the W65C816 bus interface, rather than routing all network traffic through the RP2350B:
+
+W65C816 bus
+    ├── RP2350B: video, audio, USB, SD, system I/O
+    └── ESP32-C3: Wi-Fi, Ethernet and network services
+                     │
+                     └── W5500
 
 ### Stage 1: Document and decode the interface
 
