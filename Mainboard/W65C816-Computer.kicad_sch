@@ -22867,6 +22867,13 @@
 		)
 		(uuid "d4d30597-b8a4-49c6-9198-04f28f5d56a1")
 	)
+	(wire
+		(pts
+			(xy 121.92 180.34)
+			(xy 119.38 180.34)
+		)
+		(uuid "8f0bea36-3552-46c8-bbd9-89388491d605")
+	)
 	(text "Power input: PJ-102A barrel jack is center-positive and rated 2.5 A. +5V is fused, switched, reverse-polarity protected by Q1, TVS-clamped, then feeds the daughterboard power connector and MOD1 3.3 V buck module."
 		(at 19.812 216.154 0)
 		(effects
@@ -27148,16 +27155,6 @@
 		(uuid "a787b782-97a0-435f-9ad9-56a4da0f8ce7")
 	)
 	(label "GND"
-		(at 121.92 180.34 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "a7c1c1bf-e200-439d-b2c1-0c54ef9b4575")
-	)
-	(label "GND"
 		(at 261.62 292.1 180)
 		(effects
 			(font
@@ -29906,6 +29903,16 @@
 			(justify left bottom)
 		)
 		(uuid "80ac309e-5ef4-439a-9ae8-4614e76326cf")
+	)
+	(label "PHI2_N"
+		(at 119.38 180.34 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "4adaccca-b017-4131-b3ea-640327c1f380")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
