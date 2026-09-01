@@ -178,25 +178,6 @@ pending until its underlying condition is resolved.
 
 Make and verify one subsystem at a time.
 
-### Immediate actions:
-
-Think about ESP32 C3 role
-                    ┌──────────── Wi-Fi
-                    │
-W65C816 ⇄ RP2350B ⇄ ESP32-C3
-                    │
-                    └── SPI ⇄ W5500 ⇄ Ethernet
-
-I would consider connecting the ESP32-C3 directly to the W65C816 bus interface, rather than routing all network traffic through the RP2350B:
-
-W65C816 bus
-    ├── RP2350B: video, audio, USB, SD, system I/O
-    └── ESP32-C3: Wi-Fi, Ethernet and network services
-                     │
-                     └── W5500
-
-Also consider that we still need to add full size SD card for storage, and USB Hub do we have enough pins on RP
-
 ### Stage 1: Document and decode the interface
 
 - [x] Update `board_design.txt` from `A0-A7` to `A0-A9`.
