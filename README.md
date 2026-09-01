@@ -10,7 +10,7 @@ The idea planted itself in my head and would not go away.
 
 Initially, I was thinking about building the machine entirely in an old-school way. However, I quickly realised that although the CPU and RAM are still easy to source, other components, such as dedicated video, audio, storage, and peripheral controllers, are either no longer manufactured or would simply be too expensive.
 
-Luckily, inexpensive microcontrollers such as the RP2350 can handle these responsibilities and even output an HDMI/DVI signal at retro-style resolutions. That possibility got me genuinely excited about the project.
+Luckily, inexpensive microcontrollers such as the RP2354B can handle these responsibilities and even output an HDMI/DVI signal at retro-style resolutions. That possibility got me genuinely excited about the project.
 
 I eventually understood that the computer needed to be divided into two parts.
 

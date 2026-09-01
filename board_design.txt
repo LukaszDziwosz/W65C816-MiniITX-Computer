@@ -1,15 +1,15 @@
-W65C816 + RP2350 Computer Design Overview
-==========================================
+W65C816 + RP2354B Computer Design Overview
+===========================================
 
 This repository contains a two-board 3.3 V W65C816 computer.
 
 - The mainboard is the real 65C816 computer: CPU, RAM, ROM, address decode,
   expansion bus, power entry, and socketable glue logic.
-- The RP2350 daughterboard is the modern I/O and media board: video, audio,
+- The RP2354B daughterboard is the modern I/O and media board: video, audio,
   USB, storage, networking, and dense/high-speed circuitry.
 
 The design goal is to keep user applications and game logic running as real
-65C816 machine code, while the RP2350 behaves like a hardware chipset.
+65C816 machine code, while the RP2354B behaves like a hardware chipset.
 
 
 Project Structure
@@ -31,13 +31,16 @@ W65C816-Computer/
 - AGENTS.md
 - board_design.txt
 
+The `RP2350-Daughterboard/` directory name is retained for file compatibility;
+the hardware and current schematics use the RP2354B.
+
 
 System Concept
 --------------
 
 The mainboard exposes a 24-bit address bus and 8-bit data bus from the
 W65C816. Main SRAM and boot Flash sit directly on that bus behind address
-decoding and glue logic. The RP2350 daughterboard appears to the W65C816 as a
+decoding and glue logic. The RP2354B daughterboard appears to the W65C816 as a
 memory-mapped I/O device.
 
 High-level block diagram:
@@ -46,10 +49,10 @@ W65C816 CPU (W65C816S6PG-14)
   -> 24-bit address bus / 8-bit data bus
   -> SRAM and boot Flash
   -> address decoding / glue logic
-  -> RP2350 daughterboard memory-mapped interface
+  -> RP2354B daughterboard memory-mapped interface
   -> video, audio, USB, storage, networking, debug, GPIO
 
-The RP2350 is responsible for:
+The RP2354B is responsible for:
 
 - graphics processing
 - audio processing
@@ -73,7 +76,7 @@ Mainboard Design Rules
 - Do not use 5 V-only logic parts without explicit review.
 - Every IC needs local 100 nF decoupling.
 - Flash write-enable must default to disabled.
-- HDMI, USB high-speed routing, RP2350, and dense modern circuitry belong on
+- HDMI, USB high-speed routing, RP2354B, and dense modern circuitry belong on
   the daughterboard.
 
 
@@ -194,7 +197,7 @@ enable in-system Flash programming.
 4. Address Decode and Glue Logic
 --------------------------------
 
-Address decoding generates SRAM, ROM, RP2350, expansion, and I/O chip-select
+Address decoding generates SRAM, ROM, RP2354B, expansion, and I/O chip-select
 signals. Not every spare gate must be used in revision A, but the schematic can
 include common glue packages so spare gates are available.
 
@@ -204,15 +207,14 @@ Components:
 |-----------|-------------------------|----------------|---------|
 | U6        | Main address decoder    | 74HC138N       | DIP-16  |
 | U7        | SRAM-bank decoder       | 74HC138N       | DIP-16  |
-| U8        | I/O decoder             | 74HC139N       | DIP-16  |
+| U8        | RP I/O decoder          | 74HC138N       | DIP-16  |
 | U9        | NAND gates              | 74HC00N        | DIP-14  |
 | U10       | Inverters               | 74HC04N        | DIP-14  |
 | U11       | AND gates               | 74HC08N        | DIP-14  |
-| U12       | OR gates                | 74HC32N        | DIP-14  |
-| U13       | Flip-flops              | 74HC74N        | DIP-14  |
-| U14       | Tri-state buffers       | 74HC125N       | DIP-14  |
-| U15       | Address/control buffer  | 74HC541N       | DIP-20  |
-| U16       | RP2350 data transceiver | 74HC245N       | DIP-20  |
+| U12       | I/O expansion decoder   | 74HC139N       | DIP-16  |
+| U16       | RP data transceiver    | 74HC245N       | DIP-20  |
+| U17       | RP/bus OR gates         | 74HC32N        | DIP-14  |
+| U18       | Spare inverters         | 74HC04N        | DIP-14  |
 
 Generated chip-select and control signals:
 
@@ -234,11 +236,11 @@ Revision A boot decode:
 - /OE and /WE are derived from R/W.
 
 
-5. RP2350 Mainboard Interface (RP2350B or RP2354B)
+5. RP2354B Mainboard Interface
 -----------------------------
 
-The RP2350 daughterboard is memory-mapped. The mainboard address decoder
-generates /RP_CS for the selected register range. The RP2350 does not need the
+The RP2354B daughterboard is memory-mapped. The mainboard address decoder
+generates /RP_CS for the selected register range. The RP2354B does not need the
 complete 24-bit address bus.
 
 Signals to the daughterboard:
@@ -264,23 +266,23 @@ Proposed memory map:
 
 | Address Range   | Function                      |
 |-----------------|-------------------------------|
-| $F00000-$F000FF | RP2350 registers              |
+| $F00000-$F000FF | RP2354B registers            |
 | $F00100-$F001FF | Command FIFO                  |
 | $F00200-$F002FF | Response FIFO                 |
 | $F00300-$F003FF | Input-event FIFO              |
 
 The four 256-byte pages use A8-A9 as the page select. Revision A does not
-expose a direct shared-memory window. The existing partial decode may mirror
-the 1 KiB interface through $F00000-$F1FFFF; this must be confirmed from the
-implemented decode truth table before firmware depends on the mirrors.
+expose a direct shared-memory window. The implemented decode selects
+$F00000-$F1FFFF, so the 1 KiB interface is intentionally mirrored 128 times
+through that region. Firmware may depend on the documented mirrors.
 
-The RP2350 must not drive the CPU data bus during an unselected, invalid, or
+The RP2354B must not drive the CPU data bus during an unselected, invalid, or
 reset cycle. `VDA` and `VPA` qualify valid bus cycles, and `/RP_CS` selects the
-RP2350 address region. `RP_IRQ_N` is the single active-low interrupt returned
+RP2354B address region. `RP_IRQ_N` is the single active-low interrupt returned
 by the daughterboard; frame, audio, and I/O interrupt groups remain internal
-to the RP2350.
+to the RP2354B.
 
-Suggested RP2350 register groups:
+Suggested RP2354B register groups:
 
 | Address Range   | Register Group |
 |-----------------|----------------|
@@ -294,30 +296,36 @@ Suggested RP2350 register groups:
 | $F000E0-$F000FF | Reserved       |
 
 
-6. Daughterboard Connectors
+6. Daughterboard Connector
 ---------------------------
 
-Use one modern through-hole card-edge connector so the RP2350 daughterboard
-plugs in like an expansion card. The mainboard carries the female card-edge
-socket. The daughterboard carries matching PCB edge fingers.
+Use the existing 98-pin ISA-form-factor card-edge connector and matching
+right-angle adapter so the RP2354B daughterboard plugs in like an expansion
+card. The connector is used for its mechanical convenience only; the
+electrical interface is project-specific and is not ISA-compatible. The
+mainboard carries the socket and the daughterboard carries matching edge
+fingers.
 
 Connector basis:
 
-- 80 contacts total
-- dual row, 2 x 40
+- 98 contacts total
+- dual row, 2 x 49
 - 2.54 mm / 0.100 inch contact pitch
 - 1.6 mm / 0.062 inch daughtercard thickness
-- through-hole PC tails on the mainboard socket
-- EDAC 395-series vertical socket or equivalent Sullins/EBC-style part
+- ISA16-style card-edge socket footprint on the mainboard
+- matching 98-position edge fingers on the daughterboard
 
-The exact manufacturer suffix should be frozen before PCB layout so mounting
-ears, card guides, and keying can be reflected in the footprint.
+The exact connector manufacturer and mechanical adapter are frozen separately
+from the ISA signal standard. Mounting ears, card guides, keying and insertion
+force must be checked against the selected 98-position footprint before PCB
+layout.
 
 Components:
 
 | Reference | Function                    | Suggested Part |
 |-----------|-----------------------------|----------------|
-| J6        | Daughterboard card-edge bus | EDAC 395-series 80-contact vertical THT socket or equivalent |
+| J6        | Daughterboard card-edge bus | 98-position ISA16-style card-edge socket |
+| J1        | Daughterboard edge fingers  | Matching 98-position ISA16 interface |
 | MH1-MH2   | Daughterboard support       | M3 standoffs aligned to card-edge insertion force |
 
 J6: daughterboard card-edge bus:
@@ -364,6 +372,9 @@ J6: daughterboard card-edge bus:
 | 75  | DB_GPIO1     | 76  | DB_GPIO2     |
 | 77  | GND          | 78  | +3V3         |
 | 79  | DB_GPIO3     | 80  | GND          |
+
+Pins 81-98 are reserved and currently not connected. They remain available for
+future project-specific signals, but must not be treated as ISA bus pins.
 
 Power note:
 
@@ -444,9 +455,9 @@ Suggested logic-analyser header:
 9. Mainboard Power
 ------------------
 
-The final mainboard should accept 5 V through a through-hole DC input connector
-rated for at least 5 A. PJ-102AH is the selected 5 A barrel jack for the
-mainboard input.
+The final mainboard accepts 5 V through J4, the selected 8-pin Phoenix-style
+through-hole power header (`POWER_IN_HEADER_8A`). The connector and protection
+path are rated for the expected 5 V input current.
 
 The mainboard protects and distributes the 5 V rail, then generates the main
 3.3 V logic rail with a socketed buck module.
@@ -460,7 +471,7 @@ Components:
 
 | Reference | Function                    | Suggested Implementation |
 |-----------|-----------------------------|--------------------------|
-| J4        | 5 V input                   | CUI PJ-102AH, 5 A-rated THT barrel jack |
+| J4        | 5 V input                   | `POWER_IN_HEADER_8A`, Phoenix-style THT header |
 | F1        | Input fuse                  | 5 A replaceable fuse or appropriately derated polyfuse |
 | SW3       | Main power switch           | High-current external or THT switch |
 | Q1        | Reverse-polarity protection | P-channel MOSFET, TO-220 |
@@ -487,7 +498,7 @@ Power rails:
 
 Current planning:
 
-- The RP2350 daughterboard can contain several USB-A ports. Three to four USB
+- The RP2354B daughterboard can contain several USB-A ports. Three to four USB
   ports can draw 1.5-2.0 A before the daughterboard electronics are counted.
 - The daughterboard must not connect USB-A VBUS directly to +5V. Use one
   current-limited load switch per USB-A port, with local ESD protection.
@@ -498,16 +509,16 @@ Current planning:
   input.
 
 
-RP2350 Daughterboard
+RP2354B Daughterboard
 ====================
 
 Daughterboard Design Rules
 --------------------------
 
 - The daughterboard may use SMD components where required.
-- HDMI/DVI, USB, RP2350, high-speed memory, and dense circuitry live here.
-- Follow Raspberry Pi RP2350 reference design guidance for the RP2350 core,
-  crystal, flash, power rails, RUN, BOOTSEL, and SWD.
+- HDMI/DVI, USB, RP2354B, QMI PSRAM, and dense circuitry live here.
+- Follow Raspberry Pi RP2350/RP2354B reference design guidance for the
+  RP2354B core, crystal, power rails, RUN, BOOTSEL, and SWD.
 - Route USB as 90 Ω differential pairs.
 - Keep HDMI/DVI high-speed routing entirely on the daughterboard.
 
@@ -533,21 +544,27 @@ The exact board-edge assignment may change during mechanical layout, but this
 front/rear split is the current target.
 
 
-2. RP2350 Core
+2. RP2354B Core
 --------------
 
 Components:
 
 | Reference | Function       | Suggested Part       | Package   |
 |-----------|----------------|----------------------|-----------|
-| U1        | Coprocessor    | RP2350B              | QFN-80    |
-| U2        | QSPI Flash     | W25Q128JV or similar | SOIC-8/WSON |
+| U1        | Coprocessor    | RP2354B              | QFN-80    |
+| U2        | QMI PSRAM      | APS6404L             | SMD       |
 | Y1        | Crystal        | 12 MHz               | SMD       |
-| U3        | Core regulator | RP2350 reference design | SMD    |
+| U3/U4     | USB/HDMI ESD   | TPD4E05U06DQA           | SMD       |
+| U5        | RDY/IRQ buffer | SN74LVC2G07             | SMD       |
 | SW1       | BOOTSEL        | Tactile button       | THT/SMD   |
 | SW2       | RUN/reset      | Tactile button       | THT/SMD   |
 | J3        | SWD connector  | 2x5 or 3-pin         | THT       |
 | J4        | Debug UART     | 1x4 header           | THT       |
+
+The RP2354B power and 1.1 V regulator network follows the reference design
+and is implemented with the local inductor and capacitors on the schematic;
+there is no separate external boot-flash IC in this design. U2 is the fitted
+APS6404L QMI PSRAM.
 
 
 3. Video Subsystem
@@ -560,7 +577,7 @@ Initial target:
 - Pixel format: 8-bit indexed colour
 - Refresh rate: 60 Hz
 
-RP2350 responsibilities:
+RP2354B responsibilities:
 
 - framebuffer generation
 - palette conversion
@@ -625,13 +642,12 @@ remains fixed at 640 x 480 at 60 Hz.
 5. Graphics Memory
 ------------------
 
-Revision A may use only RP2350 internal SRAM.
-
-Optional external memory:
+Revision A uses RP2354B internal SRAM together with the fitted external QMI
+PSRAM for media, graphics and buffering.
 
 | Reference | Function       | Suggested Part |
 |-----------|----------------|----------------|
-| U5        | PSRAM          | APS6404L or equivalent |
+| U2        | QMI PSRAM      | APS6404L or equivalent |
 | Cx        | Decoupling     | 100 nF |
 | R-series  | Signal damping | 22-33 Ω |
 
@@ -648,7 +664,7 @@ External PSRAM may store:
 6. USB Host
 -----------
 
-Use the RP2350B native USB D+/D- pins as the upstream connection to a dedicated
+Use the RP2354B native USB D+/D- pins as the upstream connection to a dedicated
 4-port USB 2.0 hub IC.
 
 Recommended hub IC options:
@@ -679,8 +695,8 @@ Components:
 |-----------|-----------------------|----------------|
 | U6        | USB 2.0 hub           | CH334, SL2.1A, or FE1.1s |
 | J6-J9     | USB-A connectors      | THT or hybrid USB-A |
-| Ux        | USB load switches     | AP2011, SY6280, or equivalent |
-| Ux        | USB ESD protection    | USBLC6-2SC6 or equivalent |
+| U7-U10    | USB load switches     | TPS2051CDBV             |
+| U3        | USB ESD protection    | TPD4E05U06DQA           |
 | R-series  | USB damping/series    | As recommended by hub datasheet |
 | Cx        | VBUS bulk capacitance | 47-100 uF minimum per group |
 
@@ -690,17 +706,17 @@ Components:
 
 Use a full-size SD card socket on the daughterboard.
 
-Revision A should use 4-bit SDIO through RP2350 PIO rather than SPI mode. A
+Revision A should use 4-bit SDIO through RP2354B PIO rather than SPI mode. A
 14 MHz 65C816 bus cannot consume storage data fast enough to justify a separate
-storage MCU; the RP2350 can handle SDIO and present buffered data to the 65C816
+storage MCU; the RP2354B can handle SDIO and present buffered data to the 65C816
 through registers or FIFOs.
 
 Components:
 
 | Reference | Function        | Suggested Implementation |
 |-----------|-----------------|--------------------------|
-| J10       | SD card socket  | Full-size SD preferred   |
-| Ux        | ESD protection  | Optional, near socket    |
+| J7        | SD card socket  | Full-size SD preferred   |
+| Ux        | ESD protection  | Add near socket before PCB release |
 | R-pull    | Signal pull-ups | 10 kΩ                    |
 | R-series  | Signal damping  | 22-47 Ω                  |
 | Cx        | Local bulk      | 10 uF                    |
@@ -710,28 +726,46 @@ Components:
 8. Networking
 -------------
 
-Networking is offloaded so the RP2350 does not spend large amounts of time in
+Networking is offloaded so the RP2354B does not spend large amounts of time in
 software network stacks.
 
 WiFi:
 
 - Use an ESP32-C3 module pre-flashed with AT command firmware.
-- Communicate with it over SPI.
-- Keep the wireless network stack off the RP2350.
+- Communicate with it over a full-duplex UART with hardware RTS/CTS flow
+  control.
+- Keep the wireless network stack off the RP2354B.
 
 Ethernet:
 
-- Use a WIZnet W5500 IC or module.
+- Use the WIZnet W5500 IC already placed on the daughterboard.
 - W5500 provides Ethernet MAC, PHY, and hardwired TCP/IP offload.
-- Communicate with it over SPI.
+- The ESP32-C3 is the sole W5500 SPI master; the RP2354B receives Ethernet
+  requests and events through the RP/ESP UART protocol.
+
+RP/ESP link pin assignment:
+
+| Signal | RP2354B | ESP32-C3 |
+|--------|---------|----------|
+| RP TX / ESP RX | GPIO36 | GPIO20 |
+| RP RX / ESP TX | GPIO37 | GPIO21 |
+| ESP RTS_N / RP CTS_N | GPIO38 | GPIO0 |
+| RP RTS_N / ESP CTS_N | GPIO39 | GPIO1 |
+| ESP enable | GPIO10 | EN |
+| ESP boot control | GPIO11 | GPIO9 |
+
+Keep ESP GPIO18/GPIO19 available for USB Serial/JTAG and do not use GPIO2 or
+GPIO8 for runtime handshaking because they are strapping pins. GPIO9 is only
+used for the deliberately controlled boot function and requires its safe
+pull-up.
 
 Components:
 
 | Reference | Function         | Suggested Implementation |
 |-----------|------------------|--------------------------|
-| Ux/MODx   | WiFi offload     | ESP32-C3 AT module       |
-| Ux        | Ethernet offload | WIZnet W5500             |
-| Jx        | RJ45 connector   | Integrated magnetics preferred |
+| U11       | WiFi/network coprocessor | ESP32-C3-WROOM-02U |
+| U12       | Ethernet controller | WIZnet W5500             |
+| J9        | RJ45 connector   | Integrated magnetics preferred |
 | LEDx      | Link/activity    | Optional                 |
 
 
@@ -783,7 +817,7 @@ Components:
 Software-Visible Hardware Model
 ===============================
 
-The RP2350 behaves like a hardware chipset, not like a user-programmable
+The RP2354B behaves like a hardware chipset, not like a user-programmable
 general ARM computer. The W65C816 sends compact commands and data structures
 through memory-mapped registers and FIFOs.
 
@@ -857,22 +891,22 @@ Goal:
 - output status through GPIO or debug port
 
 
-Stage 2: RP2350 Register Interface
+Stage 2: RP2354B Register Interface
 ----------------------------------
 
 Add:
 
 - Card-edge daughterboard connector
-- RP2350 daughterboard
+- RP2354B daughterboard
 - data transceiver
 - address/control buffer
 - simple status and command registers
 
 Goal:
 
-- W65C816 writes a byte to RP2350 register space
-- RP2350 receives it
-- RP2350 returns a byte
+- W65C816 writes a byte to RP2354B register space
+- RP2354B receives it
+- RP2354B returns a byte
 - IRQ signalling works
 
 
@@ -920,20 +954,17 @@ Add:
 Main Component Summary
 ======================
 
-Mainboard socketed ICs and modules:
+Mainboard socketed ICs and modules (matching the current schematic):
 
 - 1 x W65C816S6PG-14
 - 1 x 74HC573
 - 2 x 74HC245
-- 2 x 74HC138
+- 3 x 74HC138
 - 1 x 74HC139
 - 1 x 74HC00
-- 1 x 74HC04
+- 2 x 74HC04
 - 1 x 74HC08
 - 1 x 74HC32
-- 1 x 74HC74
-- 1 x 74HC125
-- 1 x 74HC541
 - 1 x 74HC14
 - 8 x AS6C4008-55PCN SRAM sockets
 - 1 x SST39VF040 Flash in PLCC socket
@@ -941,31 +972,30 @@ Mainboard socketed ICs and modules:
 
 Mainboard connectors and controls:
 
-- 1 x 80-contact daughterboard card-edge connector
+- 1 x 98-position ISA16-style daughterboard card-edge connector
 - 1 x expansion-bus connector
 - 1 x logic-analyser header
-- 1 x PJ-102AH 5 A-rated 5 V DC input connector
+- 1 x `POWER_IN_HEADER_8A` 5 V input header
 - 1 x main power switch
 - 1 x reset button
 - 1 x NMI button
 - 1 x socketed oscillator
 
-Daughterboard major components:
+Daughterboard major components (matching the current schematic):
 
-- 1 x RP2350B
-- 1 x QSPI Flash
+- 1 x RP2354B
+- 1 x APS6404L QMI PSRAM
 - 1 x 12 MHz crystal
-- 1 x RP2350 core regulator
+- 1 x RP2354B core regulator network
 - 1 x DVI/HDMI connector
-- 1 x optional PSRAM
-- 1 x 4-port USB 2.0 hub
+- 1 x FE1.1s 4-port USB 2.0 hub
 - 4 x USB-A connectors
-- 4 x USB power/load switches
+- 4 x TPS2051C USB power/load switches
 - 1 x full-size SD card socket
-- 1 x W5500 Ethernet IC or module
-- 1 x ESP32-C3 WiFi module
+- 1 x W5500 Ethernet IC
+- 1 x ESP32-C3 networking coprocessor module
 - 1 x PCM5102A audio module
-- 1 x matching 80-contact PCB edge-finger interface
+- 1 x matching 98-position PCB edge-finger interface
 
 The boundary remains simple: the mainboard is a genuine, mostly socketed
 65C816 computer; the daughterboard carries the unavoidable modern SMD and

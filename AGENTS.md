@@ -5,8 +5,11 @@
 - This is a 3.3 V W65C816 computer.
 - Application code runs on a physical W65C816S CPU.
 - The RP2354B is a video, audio and I/O coprocessor.
+- The mainboard/daughterboard interconnect is a 98-pin ISA-form-factor
+  connector used for mechanical convenience only; its signals are
+  project-specific and are not ISA-standard.
 - Prefer through-hole and socketable components wherever practical on the mainboard.
-- The RP2354B daughterboard may use SMD components as required for the RP2350B, HDMI/DVI, USB, high-speed memory and other dense or high-speed circuitry.
+- The RP2354B daughterboard may use SMD components as required for the RP2354B, HDMI/DVI, USB, high-speed memory and other dense or high-speed circuitry.
 - Do not replace selected parts without explaining why.
 - Do not make large changes in a single operation.
 
@@ -16,7 +19,7 @@
 - AS6C4008 SRAM in DIP-32.
 - Mainboard glue logic in DIP packages.
 - Use turned-pin sockets for CPU, memory and important logic.
-- HDMI and high-speed video circuitry remain on the RP2350 daughterboard and are not expected to be through-hole.
+- HDMI and high-speed video circuitry remain on the RP2354B daughterboard and are not expected to be through-hole.
 
 ## Electrical rules
 
