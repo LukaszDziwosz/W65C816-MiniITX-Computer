@@ -18,8 +18,8 @@ and accelerator memory.
 - Keep the 98-pin ISA-style edge connector and matching right-angle adapter.
 - This is a mechanically convenient, robust connector only. The electrical
   interface is project-specific and is not ISA-compatible.
-- Preserve the existing connector pinout unless an individually reviewed
-  electrical change requires a pin reassignment.
+- The existing connector pinout is provisional and may be revised during PCB layout. However,
+  every change must be reviewed individually, as any electrical modification may require pin reassignment.
 - Update `AGENTS.md` and `board_design.txt` later to remove the conflicting
   2x20 and 80-contact connector descriptions.
 
