@@ -40,7 +40,6 @@ With this arrangement, the only custom enclosure component required should be th
 
 # Technical details
 
-# W65C816 / RP2354B Computer
 
 A modern 65C816-based computer built around a real WDC W65C816 processor, with an RP2354B acting as a memory-mapped multimedia and I/O chipset.
 
