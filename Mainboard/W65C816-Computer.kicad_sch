@@ -22380,6 +22380,14 @@
 		(at 375.92 304.8)
 		(uuid "b07e6d70-7526-456a-ab6d-58b4ed71802c")
 	)
+	(no_connect
+		(at 336.55 157.48)
+		(uuid "dd12375d-1520-4e57-a639-7a6ac944b3dd")
+	)
+	(no_connect
+		(at 351.79 157.48)
+		(uuid "654126d6-3fc2-4f6d-b08b-835024061b6d")
+	)
 	(wire
 		(pts
 			(xy 99.06 27.94)
@@ -22874,6 +22882,55 @@
 		)
 		(uuid "8f0bea36-3552-46c8-bbd9-89388491d605")
 	)
+	(wire
+		(pts
+			(xy 351.79 142.24)
+			(xy 354.33 142.24)
+		)
+		(uuid "9a536d5b-bdbf-45d4-859e-d273623fc31c")
+	)
+	(wire
+		(pts
+			(xy 354.33 166.37)
+			(xy 351.79 166.37)
+		)
+		(uuid "874e9cc8-dd07-425c-961a-65f765a9b651")
+	)
+	(wire
+		(pts
+			(xy 354.33 171.45)
+			(xy 351.79 171.45)
+		)
+		(uuid "b0a1922c-f979-4b72-8168-f697eb9cf2ec")
+	)
+	(wire
+		(pts
+			(xy 369.57 168.91)
+			(xy 372.11 168.91)
+		)
+		(uuid "d724b609-a43f-4af0-b8d3-2de4b7917fa9")
+	)
+	(wire
+		(pts
+			(xy 354.33 187.96)
+			(xy 351.79 187.96)
+		)
+		(uuid "91ffd807-4ced-43c5-b20e-9af989e5e955")
+	)
+	(wire
+		(pts
+			(xy 354.33 193.04)
+			(xy 351.79 193.04)
+		)
+		(uuid "2263ec6a-b074-4fbd-8e89-efa8d6e777e9")
+	)
+	(wire
+		(pts
+			(xy 369.57 190.5)
+			(xy 372.11 190.5)
+		)
+		(uuid "5c36d975-c946-4578-935e-cbd4557aa019")
+	)
 	(text "Power input: PJ-102A barrel jack is center-positive and rated 2.5 A. +5V is fused, switched, reverse-polarity protected by Q1, TVS-clamped, then feeds the daughterboard power connector and MOD1 3.3 V buck module."
 		(at 19.812 216.154 0)
 		(effects
@@ -23123,16 +23180,6 @@
 			(justify right bottom)
 		)
 		(uuid "0775a08c-250d-4b26-9919-ed36505a3c7e")
-	)
-	(label "MEM_OE_N"
-		(at 351.79 142.24 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "080aa9a6-4852-4710-bd0e-ed02754e4c33")
 	)
 	(label "+5V"
 		(at 127 270.51 0)
@@ -23463,16 +23510,6 @@
 			(justify left bottom)
 		)
 		(uuid "16d84cd4-acc1-4070-83f4-9345792dca58")
-	)
-	(label "MEM_OE_N"
-		(at 336.55 157.48 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "17c06c23-4859-4f3e-a71a-ac3273316ba2")
 	)
 	(label "A23"
 		(at 537.21 237.49 180)
@@ -28624,16 +28661,6 @@
 		)
 		(uuid "e03c4841-56f8-44f0-ba74-e98f86bcb534")
 	)
-	(label "MEM_WE_N"
-		(at 351.79 157.48 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "e05b89b0-8861-4d80-95dc-a839c8537fe4")
-	)
 	(label "A4"
 		(at 458.47 111.76 180)
 		(effects
@@ -29913,6 +29940,76 @@
 			(justify right bottom)
 		)
 		(uuid "4adaccca-b017-4131-b3ea-640327c1f380")
+	)
+	(label "RWB_N"
+		(at 354.33 142.24 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "28e7dcd6-94a6-48fd-9dd5-a34889837359")
+	)
+	(label "PHI2"
+		(at 351.79 166.37 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "ba704df2-9edd-4680-b434-35336950d152")
+	)
+	(label "RWB"
+		(at 351.79 171.45 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "bd358e20-6bfd-4120-80ea-82b8f9b80ac3")
+	)
+	(label "MEM_OE_N"
+		(at 372.11 168.91 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "b3447ee5-3765-4d97-a30a-c5e36a866cc1")
+	)
+	(label "PHI2"
+		(at 351.79 187.96 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "8964a40e-719d-419c-81fd-1d55f6857635")
+	)
+	(label "RWB_N"
+		(at 351.79 193.04 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "7e330762-bbbe-4165-866d-de1c2d7971bf")
+	)
+	(label "MEM_WE_N"
+		(at 372.11 190.5 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "53ca36a7-07bf-446f-b212-865443cb3d0e")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
@@ -32578,82 +32675,6 @@
 		)
 	)
 	(symbol
-		(lib_id "power:GND")
-		(at 354.33 193.04 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "286e4c18-98b0-4f57-b4e8-563010fa1023")
-		(property "Reference" "#PWR055"
-			(at 354.33 199.39 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 354.33 196.85 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 354.33 193.04 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 354.33 193.04 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 354.33 193.04 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(body_style 1)
-		(in_pos_files yes)
-		(pin "1"
-			(uuid "db5e9be6-c272-43dc-bdfd-82d85b9dbf52")
-		)
-		(instances
-			(project "W65C816-Computer"
-				(path "/a4bc8387-953d-4bdb-a0f8-9d74e7b38b13"
-					(reference "#PWR055")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "Connector:TestPoint")
 		(at 392.43 104.14 0)
 		(unit 1)
@@ -34452,82 +34473,6 @@
 				(path "/a4bc8387-953d-4bdb-a0f8-9d74e7b38b13"
 					(reference "U11")
 					(unit 2)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 354.33 166.37 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "3e0f09a5-cc92-48d4-8836-f61a60852225")
-		(property "Reference" "#PWR052"
-			(at 354.33 172.72 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 354.33 170.18 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 354.33 166.37 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 354.33 166.37 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 354.33 166.37 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(body_style 1)
-		(in_pos_files yes)
-		(pin "1"
-			(uuid "146a2bf7-8eff-43a4-aba6-610afbd38fd9")
-		)
-		(instances
-			(project "W65C816-Computer"
-				(path "/a4bc8387-953d-4bdb-a0f8-9d74e7b38b13"
-					(reference "#PWR052")
-					(unit 1)
 				)
 			)
 		)
@@ -37535,82 +37480,6 @@
 				(path "/a4bc8387-953d-4bdb-a0f8-9d74e7b38b13"
 					(reference "U9")
 					(unit 5)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 354.33 187.96 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "6952110b-81a0-43e9-8641-46915901b27e")
-		(property "Reference" "#PWR054"
-			(at 354.33 194.31 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 354.33 191.77 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 354.33 187.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 354.33 187.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 354.33 187.96 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(body_style 1)
-		(in_pos_files yes)
-		(pin "1"
-			(uuid "c2a2b65c-65d1-44ca-a979-922838ad91d0")
-		)
-		(instances
-			(project "W65C816-Computer"
-				(path "/a4bc8387-953d-4bdb-a0f8-9d74e7b38b13"
-					(reference "#PWR054")
-					(unit 1)
 				)
 			)
 		)
@@ -45798,82 +45667,6 @@
 			(project "W65C816-Computer"
 				(path "/a4bc8387-953d-4bdb-a0f8-9d74e7b38b13"
 					(reference "C11")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 354.33 171.45 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "e935120d-7750-4155-b897-958eaf52cdf2")
-		(property "Reference" "#PWR053"
-			(at 354.33 177.8 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 354.33 175.26 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 354.33 171.45 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 354.33 171.45 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 354.33 171.45 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(body_style 1)
-		(in_pos_files yes)
-		(pin "1"
-			(uuid "52720390-72af-485f-9a02-7dfd7d6c84fe")
-		)
-		(instances
-			(project "W65C816-Computer"
-				(path "/a4bc8387-953d-4bdb-a0f8-9d74e7b38b13"
-					(reference "#PWR053")
 					(unit 1)
 				)
 			)
