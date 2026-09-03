@@ -34,7 +34,7 @@ computer with a legacy CPU attached.
 | Optional SRAM | 4 further AS6C4008 footprints = 4 MiB maximum |
 | Flash | SST39SF040-55-4I-NHE, PLCC-32 socket |
 | Critical glue | 5 V 74AHC, preferably DIP/socketed |
-| RP data boundary | SN74LXC8T245, 3.3 V to 5 V dual-supply |
+| RP data boundary | SN74LXC8T245, A/VCCA=5 V system bus and B/VCCB=3.3 V RP bus |
 
 Use turned-pin sockets for the CPU, SRAM, Flash socket, and important DIP
 logic. Keep the SRAM, CPU, latch, and critical buffers physically close.
@@ -182,10 +182,12 @@ are all one-shot operations even when an access is stretched.
 9. RP 3.3 V / mainboard 5 V boundary
 -------------------------------------
 
-U16 is SN74LXC8T245. Connect its A side/VCCA to the RP 3.3 V data bus and its
-B side/VCCB to the 5 V system data bus. `DIR` follows a valid 3.3 V-domain
-form of RWB: CPU read is RP-to-CPU, CPU write is CPU-to-RP. `/OE` has an
-external pull-up and defaults disabled.
+U16 is SN74LXC8T245. Connect its A side/VCCA to the 5 V system data bus and its
+B side/VCCB to the RP 3.3 V data bus. The device convention is DIR high for
+A-to-B, so set `DIR = NOT(RWB)`: CPU write (`RWB=0`) is system-to-RP and CPU
+read (`RWB=1`) is RP-to-system. `/OE` and `DIR` are therefore 5 V-domain
+controls referenced to VCCA. `/OE` has an external 5 V pull-up and defaults
+disabled.
 
 U16 can enable only when all of the following are true:
 
@@ -196,9 +198,12 @@ It is disabled during reset, PHI2 low, non-RP cycles, invalid cycles, absent
 or unpowered daughterboard, and before RP firmware/bus readiness. The RP data
 GPIO are inputs/high impedance except while driving a selected CPU read.
 
-5 V should be translated to 3.3 V by design. Direct 5 V input is allowed only
-for a pin individually verified as RP2354B digital FT, used solely as an input,
-with documented startup/brownout behaviour and no unpowered 3.3 V domain.
+Every 5 V connector input must first pass through a dedicated power-off-safe 3.3 V
+input buffer at the daughterboard boundary. Direct 5 V on an RP GPIO is not the
+normal level-shifting method. An individually verified RP2354B digital FT pin may
+be used directly only as a documented input-only fault-resilience fallback, with
+verified startup/brownout behaviour and no unpowered 3.3 V domain; it must never
+be used as a 5 V output.
 
 IOVDD is operating at 3.3 V !!!!!
 
@@ -208,7 +213,7 @@ tolerance is only fault resilience. !!!
 Never use analog-capable/non-FT GPIO for direct 5 V. Small 220 ohm to 1 kohm
 series resistors may provide damping and limited injection-current protection;
 they are not voltage dividers. PHI2 must not use a resistor-divider translator.
-Optional power-off-safe 3.3 V buffers may be included for all RP input lines.
+The required input buffers are the normal path for all RP connector inputs.
 
 RDY and RP_IRQ_N are 5 V mainboard nets with mainboard pull-ups. The RP uses
 fast open-drain/open-collector stages that default released when the board is

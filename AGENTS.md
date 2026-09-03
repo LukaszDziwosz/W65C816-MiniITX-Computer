@@ -26,9 +26,17 @@
 ## 3.3 V RP2354B boundary
 
 - The daughterboard derives 3.3 V from the same 5 V input. It must not backfeed either rail through GPIO, translators, USB, SD, or protection structures.
-- Use SN74LXC8T245 for U16: VCCA/RP side at 3.3 V, VCCB/system side at 5 V. /OE must have an external pull-up and default disabled during reset, absent/unpowered daughterboard, PHI2 low, invalid cycles, and non-RP accesses.
-- U16 direction and enable controls must be valid in the 3.3 V domain. The RP drives its local data pins only during a selected CPU read.
-- 5 V should be translated to 3.3 V by design. Direct 5 V inputs are permitted only on individually verified RP2354B FT GPIO, only as inputs, and only with the correct power state.
+- Use SN74LXC8T245 for U16: A/VCCA/system side at 5 V and B/VCCB/RP side at 3.3 V. With
+  the device convention (DIR high = A-to-B), set `DIR = NOT(RWB)`: CPU write (`RWB=0`)
+  is system-to-RP and CPU read (`RWB=1`) is RP-to-system.
+- U16 `/OE` and `DIR` controls are 5 V-domain signals because they are referenced to VCCA.
+  `/OE` must have an external 5 V pull-up and default disabled during reset, absent/unpowered
+  daughterboard, PHI2 low, invalid cycles, and non-RP accesses. The RP drives its local data
+  pins only during a selected CPU read.
+- Every 5 V connector input must first pass through a dedicated power-off-safe 3.3 V input buffer
+  at the daughterboard boundary. Direct 5 V on an RP GPIO is not the normal level-shifting method.
+- An individually verified RP2354B FT GPIO may be used directly only as a documented input-only
+  fault-resilience fallback, only with the correct IOVDD power state, and never as an output.
 - **IOVDD is operating at 3.3 V !!!!!** Direct 5 V must never reach an unpowered/disabled 3.3 V domain.
 - **Non-FT pins must not receive 5 V. FT pins should receive 3.3 V by design; 5 V tolerance is only a fault-resilience constraint. !!!**
 - Never use analog-capable or otherwise non-FT pins for direct 5 V signals. Document each pin assignment against the RP2354B pin table.
@@ -47,6 +55,7 @@
 
 - Explain proposed electrical changes before applying them; work on one subsystem at a time.
 - Preserve reference designators.
+- Use ordinary, recognisable library symbols and distributor-orderable manufacturer part numbers. Do not introduce custom, generic, obsolete, or otherwise unusual symbols/footprints when a normal verified library symbol exists; ask before any exception.
 - Never directly edit KiCad source files. Use Konnect MCP tools for all `.kicad_sch`, `.kicad_pcb`, library-table, symbol, and footprint changes.
 - Run ERC after every schematic subsystem change and DRC after related PCB changes.
 - Do not autoroute USB or video differential pairs. Route them manually.

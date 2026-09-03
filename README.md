@@ -52,12 +52,22 @@ The first wait state for an RP access is generated in deterministic mainboard ha
 - Flash starts with one hardware wait state. Zero-wait Flash is optional only after calculation and logic-analyser verification.
 - U2 is a 74AHC573 transparent bank latch, controlled by a single 74AHC04 inversion of PHI2.
 - U3 remains a 74AHC245 memory-side data transceiver unless timing and loading analysis proves a better arrangement.
-- U16 is an SN74LXC8T245 dual-supply transceiver: 3.3 V on the RP side and 5 V on the system side.
+- U16 is an SN74LXC8T245 dual-supply transceiver with A/VCCA on the 5 V system data bus and
+  B/VCCB on the 3.3 V RP data bus. With the device's convention, `DIR = NOT(RWB)`: CPU write
+  (`RWB=0`) is A-to-B and CPU read (`RWB=1`) is B-to-A.
 - RDY and IRQ are 5 V pulled-up, open-drain signals; the daughterboard never drives either high.
 - The mainboard must boot without the daughterboard, with the RP held in reset, and with no RP firmware.
 - Every IC requires local 100 nF decoupling.
 
-The RP boundary is intentionally conservative. 5 V signals should be translated to 3.3 V by design. Direct 5 V use is permitted only on individually verified RP2354B FT GPIO, only while IOVDD is at 3.3 V, and never on analog-capable or other non-FT pins.
+The RP boundary is intentionally conservative. Every 5 V connector input uses a dedicated
+3.3 V input buffer at the daughterboard boundary; a direct 5 V RP GPIO connection is not the
+normal level-shifting method. An individually verified RP2354B FT GPIO may be used directly only
+as a documented input-only fault-resilience fallback, only while IOVDD is at 3.3 V, and never
+on an analog-capable or other non-FT pin.
+
+**IOVDD is operating at 3.3 V !!!!!** Direct 5 V must never reach an unpowered or disabled
+3.3 V domain. **Non-FT pins must not receive 5 V. FT pins should receive 3.3 V by design;
+5 V tolerance is only a fault-resilience constraint. !!!**
 
 ## Bring-up progression
 
